@@ -54,7 +54,7 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_cancelButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eCancelButtonHandler, false, this);
 		}
 		
-		proto.viewReady = function(){
+		proto.Override.viewReady = function(){
 			proto.superclass().viewReady.apply(this, arguments);
 			
 			this._cl_contentView.addSubView(this._cl_messageField);

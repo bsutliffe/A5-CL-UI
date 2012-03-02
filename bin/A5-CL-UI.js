@@ -1116,7 +1116,7 @@ a5.Package('a5.cl.ui')
 			this._cl_context = null;
 		}
 		
-		proto.viewReady = function(){
+		proto.Override.viewReady = function(){
 			proto.superclass().viewReady.apply(this, arguments);
 			if (UICanvas.canvasAvailable) {
 				this._cl_canvasElement = document.createElement('canvas');
@@ -1147,7 +1147,7 @@ a5.Package('a5.cl.ui')
 			}
 		}
 		
-		proto._cl_redraw = function(){
+		proto.Override._cl_redraw = function(){
 			proto.superclass()._cl_redraw.apply(this, arguments);
 			this._cl_canvasElement.width = this.width('client') + this._cl_overflowWidth;
 			this._cl_canvasElement.height = this.height('client') + this._cl_overflowHeight;
@@ -5453,7 +5453,7 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_cancelButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eCancelButtonHandler, false, this);
 		}
 		
-		proto.viewReady = function(){
+		proto.Override.viewReady = function(){
 			proto.superclass().viewReady.apply(this, arguments);
 			
 			this._cl_contentView.addSubView(this._cl_messageField);
