@@ -32,7 +32,7 @@ a5.Package('a5.cl.ui.form')
 			return this._cl_input.type;
 		}
 		
-		proto.selected = function(value, suppressEvent){
+		proto.Override.selected = function(value, suppressEvent){
 			if (typeof value === 'boolean') {
 				this._cl_input.checked = value;
 			}

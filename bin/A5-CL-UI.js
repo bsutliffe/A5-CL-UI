@@ -3872,7 +3872,7 @@ a5.Package('a5.cl.ui.form')
 			this.focus();
 		}
 		
-		proto._cl_eKeyUpHandler = function(e){
+		proto.Override._cl_eKeyUpHandler = function(e){
 			if(im.Keyboard.isVisibleCharacter(e.keyCode()) || e.keyCode() === im.Keyboard.BACKSPACE || e.keyCode() === im.Keyboard.DELETE)
 				this.dispatchEvent(this._cl_changeEvent);
 			if(this._cl_historyEnabled && this._cl_history.length > 0){
@@ -4008,7 +4008,7 @@ a5.Package('a5.cl.ui.form')
 			return this._cl_input.type;
 		}
 		
-		proto.selected = function(value, suppressEvent){
+		proto.Override.selected = function(value, suppressEvent){
 			if (typeof value === 'boolean') {
 				this._cl_input.checked = value;
 			}
@@ -4922,7 +4922,7 @@ a5.Package('a5.cl.ui.buttons')
 			}
 		}
 		
-		proto.selected = function(value){
+		proto.Override.selected = function(value){
 			var returnVal = this.mixins().selected.call(this, value);
 			if (typeof value === 'boolean') {
 				this.themeState(value ? 'selected' : this._cl_state);

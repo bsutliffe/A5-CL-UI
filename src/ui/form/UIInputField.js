@@ -313,7 +313,7 @@ a5.Package('a5.cl.ui.form')
 			this.focus();
 		}
 		
-		proto._cl_eKeyUpHandler = function(e){
+		proto.Override._cl_eKeyUpHandler = function(e){
 			if(im.Keyboard.isVisibleCharacter(e.keyCode()) || e.keyCode() === im.Keyboard.BACKSPACE || e.keyCode() === im.Keyboard.DELETE)
 				this.dispatchEvent(this._cl_changeEvent);
 			if(this._cl_historyEnabled && this._cl_history.length > 0){

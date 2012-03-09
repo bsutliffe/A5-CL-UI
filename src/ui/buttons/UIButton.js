@@ -122,7 +122,7 @@ a5.Package('a5.cl.ui.buttons')
 			}
 		}
 		
-		proto.selected = function(value){
+		proto.Override.selected = function(value){
 			var returnVal = this.mixins().selected.call(this, value);
 			if (typeof value === 'boolean') {
 				this.themeState(value ? 'selected' : this._cl_state);
