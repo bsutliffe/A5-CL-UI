@@ -39,7 +39,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
 			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
-			this.height('auto').relX(true);
+			this.height('auto');//.relX(true);
 			if(typeof text === 'string') this.value(text);
 			
 			this.addEventListener(im.UIEvent.FOCUS, this._cl_eFocusHandler, false, this);

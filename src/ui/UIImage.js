@@ -68,7 +68,7 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = im.Utils.makeAbsolutePath(this._cl_src);
+				this._cl_imgElement.src = this._cl_src ? im.Utils.makeAbsolutePath(this._cl_src) : null;
 			} else {
 				//console.log("url('" + this._cl_src + "')");
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
@@ -145,7 +145,7 @@ a5.Package('a5.cl.ui')
 		 * @param {String} url
 		 */
 		proto.src = function(src){
-			if(typeof src === 'string'){
+			if(typeof src === 'string' || src === null){
 				var didChange = src !== this._cl_src;
 				this._cl_src = src;
 				if(didChange)

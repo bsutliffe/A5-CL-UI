@@ -12,7 +12,9 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIControl = function(){
 			proto.superclass(this);
-			this.usePointer(false);
+			this.usePointer(false)
+			//TODO:!
+			//this.width('auto').height('auto');
 		}
 		
 });
