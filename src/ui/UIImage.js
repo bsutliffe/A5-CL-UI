@@ -59,19 +59,26 @@ a5.Package('a5.cl.ui')
 					self.redraw();
 				},
 				onError = function(e){
-					//self.redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
+					self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
 					self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
 				};
 			this._cl_imgLoaded = false;
+			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
 			if (!this._cl_isBG) {
 				this._cl_imgElement.style.visibility = 'hidden';
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = this._cl_src ? im.Utils.makeAbsolutePath(this._cl_src) : null;
+				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? im.Utils.makeAbsolutePath(this._cl_src) : null;
 			} else {
-				//console.log("url('" + this._cl_src + "')");
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
+			}
+			if(!this._cl_src){
+				self._cl_nativeWidth = 0 || self._cl_imgElement.width;
+				self._cl_nativeHeight = 0 || self._cl_imgElement.height;
+				self._cl_updateImgSize();
+				self.drawHTML(self._cl_imgElement);
+				self.redraw();
 			}
 		}
 		
