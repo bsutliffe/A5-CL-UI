@@ -26,6 +26,7 @@ a5.Package('a5.cl.ui')
 			this._cl_nativeWidth = 0;
 			this._cl_nativeHeight = 0;
 			this._cl_scaleMode = im.UIScaleMode.CLIP;
+			this._cl_isBase64 = false;
 			this._cl_imageAlignX = 'left';
 			this._cl_imageAlignY = 'top';
 			this._cl_imgLoaded = false;
@@ -69,7 +70,7 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? im.Utils.makeAbsolutePath(this._cl_src) : null;
+				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
 			}

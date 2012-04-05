@@ -30,7 +30,7 @@ a5.Package('a5.cl.ui.core')
 		}
 		
 		self._cl_deregisterThemable = function(obj){
-			var idx = themables.indexOf(obj);
+			var idx = im.Utils.arrayIndexOf(themables, obj)
 			if(idx > -1)
 				themables.splice(idx, 1);
 		}

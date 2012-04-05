@@ -108,7 +108,7 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [value]
 		 */
 		proto.Override.value = function(value){
-			if(value !== undefined){
+			if(value !== undefined && value !== null){
 				value = value + ''; //force to a string
 				this._cl_element.value = value;
 				this._cl_element.setAttribute('value', value);
