@@ -1,37 +1,5 @@
 //A5, Copyright (c) 2011, Jeff dePascale & Brian Sutliffe. http://www.jeffdepascale.com
 (function( a5, undefined ) {
-/** @name a5.cl.ui 
- * @namespace UI interface controllers, windows, and views. 
- * These are not included in the AirFrame CL deployment by default and 
- * must be included separately. 
- */
-a5.SetNamespace('a5.cl.ui');
-
-a5.SetNamespace('a5.cl.ui.core');
-
-/** @name a5.cl.ui.events 
- * @namespace UI interface events
- * These are not included in the AirFrame CL deployment by default and 
- * must be included separately. 
- */
-
-/** @name a5.cl.ui.form
- * @namespace UI interface form elements
- * These are not included in the AirFrame CL deployment by default and 
- * must be included separately. 
- */ 
-
-/** @name a5.cl.ui.modals
- * @namespace UI interface modal views and controllers
- * These are not included in the AirFrame CL deployment by default and 
- * must be included separately. 
- */ 
-
-/** @name a5.cl.ui.themes
- * @namespace AirFrame CL first party UI themes
- * These are not included in the AirFrame CL deployment by default and 
- * must be included separately. 
- */
 a5.Package('a5.cl.ui')
 	.Extends('a5.cl.CLAddon')
 	.Class('UI', function(self, im){
@@ -43,7 +11,6 @@ a5.Package('a5.cl.ui')
 			this.configDefaults({
 				themeURL:null
 			});
-			
 			themeManager = this.create(a5.cl.ui.core.ThemeManager);
 		}
 		
@@ -364,7 +331,7 @@ a5.Package('a5.cl.ui.core')
 		}
 		
 		self._cl_deregisterThemable = function(obj){
-			var idx = themables.indexOf(obj);
+			var idx = im.Utils.arrayIndexOf(themables, obj)
 			if(idx > -1)
 				themables.splice(idx, 1);
 		}
@@ -378,10 +345,20 @@ a5.Package('a5.cl.ui.core')
 				orientation: this.cl().clientOrientation()
 			}), prop;
 			for(prop in styles){
-				if(typeof obj[prop] === 'function')
-					obj[prop].apply(obj, styles[prop]);
-				else if(obj.hasOwnProperty(prop))
-					obj[prop] = styles[prop][0];
+				var spl = prop.split('_'),
+					checkedProp,
+					checkedObj = obj;
+				if (spl.length > 1) {
+					checkedProp = spl.pop();
+					for(var i = 0, l = spl.length; i<l; i++)
+						checkedObj = checkedObj[spl[i]]();
+				} else {
+					checkedProp = spl[0];
+				}
+				if(typeof checkedObj[checkedProp] === 'function')
+					checkedObj[checkedProp].apply(checkedObj, styles[prop]);
+				else if(checkedObj.hasOwnProperty(checkedProp))
+					checkedObj[checkedProp] = styles[prop][0];
 			}
 		}
 });
@@ -1053,7 +1030,9 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIControl = function(){
 			proto.superclass(this);
-			this.usePointer(false);
+			this.usePointer(false)
+			//TODO:!
+			//this.width('auto').height('auto');
 		}
 		
 });
@@ -1182,6 +1161,7 @@ a5.Package('a5.cl.ui')
 			this._cl_nativeWidth = 0;
 			this._cl_nativeHeight = 0;
 			this._cl_scaleMode = im.UIScaleMode.CLIP;
+			this._cl_isBase64 = false;
 			this._cl_imageAlignX = 'left';
 			this._cl_imageAlignY = 'top';
 			this._cl_imgLoaded = false;
@@ -1215,19 +1195,26 @@ a5.Package('a5.cl.ui')
 					self.redraw();
 				},
 				onError = function(e){
-					//self.redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
+					self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
 					self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
 				};
 			this._cl_imgLoaded = false;
+			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
 			if (!this._cl_isBG) {
 				this._cl_imgElement.style.visibility = 'hidden';
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = im.Utils.makeAbsolutePath(this._cl_src);
+				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
 			} else {
-				//console.log("url('" + this._cl_src + "')");
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
+			}
+			if(!this._cl_src){
+				self._cl_nativeWidth = 0 || self._cl_imgElement.width;
+				self._cl_nativeHeight = 0 || self._cl_imgElement.height;
+				self._cl_updateImgSize();
+				self.drawHTML(self._cl_imgElement);
+				self.redraw();
 			}
 		}
 		
@@ -1301,7 +1288,7 @@ a5.Package('a5.cl.ui')
 		 * @param {String} url
 		 */
 		proto.src = function(src){
-			if(typeof src === 'string'){
+			if(typeof src === 'string' || src === null){
 				var didChange = src !== this._cl_src;
 				this._cl_src = src;
 				if(didChange)
@@ -2133,7 +2120,7 @@ a5.Package('a5.cl.ui')
 		["a5.Contract", {panel:'a5.cl.ui.UIAccordionPanel', index:'number'}], 
 		function(args){
 			if(args){
-				this.addSubViewAtIndex(args.panel, index);
+				this.addSubViewAtIndex(args.panel, args.index);
 				this.build();
 			}
 		})
@@ -2328,13 +2315,16 @@ a5.Package('a5.cl.ui')
 	.Extends('UIControl')
 	.Prototype('UIAccordionPanel', function(proto, im){
 		
-		proto.UIAccordionPanel = function(){
-			proto.superclass(this);
+		this.Properties(function(){
 			this._cl_expanded = true;
 			this._cl_expandedSize = 100;
 			this._cl_collapsedSize = 30;
 			this._cl_accordion = null;
 			this._cl_collapsible = true;
+		})
+		
+		proto.UIAccordionPanel = function(){
+			proto.superclass(this);
 			this.initHandle();
 		}
 		
@@ -3598,7 +3588,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
 			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
-			this.height('auto').relX(true);
+			this.height('auto');//.relX(true);
 			if(typeof text === 'string') this.value(text);
 			
 			this.addEventListener(im.UIEvent.FOCUS, this._cl_eFocusHandler, false, this);
@@ -3667,7 +3657,7 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [value]
 		 */
 		proto.Override.value = function(value){
-			if(value !== undefined){
+			if(value !== undefined && value !== null){
 				value = value + ''; //force to a string
 				this._cl_element.value = value;
 				this._cl_element.setAttribute('value', value);
@@ -5001,7 +4991,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.open = function(){
-			this.cl().application().addWindow(this);
+			this.MVC().application().addWindow(this);
 		}
 		
 		proto.Override.show = function(){
@@ -5010,7 +5000,7 @@ a5.Package('a5.cl.ui.modals')
 		
 		proto.close = function(){
 			if(this.isOpen())
-				this.cl().application().removeWindow(this, this._cl_destroyOnClose);
+				this.MVC().application().removeWindow(this, this._cl_destroyOnClose);
 		}
 		
 		proto.Override.hide = function(){
@@ -5018,7 +5008,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.isOpen = function(){
-			return this.cl().application().containsWindow(this);
+			return this.MVC().application().containsWindow(this);
 		}
 		
 		proto.destroyOnClose = function(value){
@@ -5570,13 +5560,16 @@ a5.Package('a5.cl.ui.list')
 	.Extends('a5.cl.ui.UIAccordionPanel')
 	.Prototype('UIListItem', function(proto, im){
 		
-		proto.UIListItem = function(label, data){
+		this.Properties(function(){
 			this._cl_data = null;
 			this._cl_subList = null;
 			this._cl_expandable = false;
 			this._cl_expandedSize = 40;
 			this._cl_collapsedSize = 40;
 			this._cl_pendingSubList = null;
+		})
+		
+		proto.UIListItem = function(label, data){
 			proto.superclass(this);
 		}
 				
@@ -5795,7 +5788,7 @@ a5.Package('a5.cl.ui.list')
 		proto.addItemAtIndex = function(listItem, index){
 			if(listItem instanceof im.UIListItem){
 				this._cl_locked(false);
-				this.addPanel(listItem);
+				this.addPanelAtIndex(listItem, index);
 				this._cl_locked(true);
 			}
 		}
@@ -5804,10 +5797,10 @@ a5.Package('a5.cl.ui.list')
 		 * 
 		 * @param {a5.cl.ui.list.UIListItem} listItem
 		 */
-		proto.removeItem = function(listItem){
+		proto.removeItem = function(listItem, shouldDestroy){
 			if(listItem instanceof im.UIListItem){
 				this._cl_locked(false);
-				this.removeSubView(listItem);
+				this.removeSubView(listItem, shouldDestroy);
 				this._cl_locked(true);
 			}
 		}
@@ -5816,16 +5809,16 @@ a5.Package('a5.cl.ui.list')
 		 * 
 		 * @param {Number} index
 		 */
-		proto.removeItemAtIndex = function(index){
-			this.removeItem(this.subViewAtIndex(index));
+		proto.removeItemAtIndex = function(index, shouldDestroy){
+			this.removeItem(this.subViewAtIndex(index), shouldDestroy);
 		}
 		
 		/**
 		 * 
 		 */
-		proto.removeAllItems = function(){
+		proto.removeAllItems = function(shouldDestroy){
 			this._cl_locked(false);
-			this.removeAllSubViews();
+			this.removeAllSubViews(shouldDestroy);
 			this._cl_locked(true);
 		}
 		

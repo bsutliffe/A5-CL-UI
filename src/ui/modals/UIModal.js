@@ -13,7 +13,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.open = function(){
-			this.cl().application().addWindow(this);
+			this.MVC().application().addWindow(this);
 		}
 		
 		proto.Override.show = function(){
@@ -22,7 +22,7 @@ a5.Package('a5.cl.ui.modals')
 		
 		proto.close = function(){
 			if(this.isOpen())
-				this.cl().application().removeWindow(this, this._cl_destroyOnClose);
+				this.MVC().application().removeWindow(this, this._cl_destroyOnClose);
 		}
 		
 		proto.Override.hide = function(){
@@ -30,7 +30,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.isOpen = function(){
-			return this.cl().application().containsWindow(this);
+			return this.MVC().application().containsWindow(this);
 		}
 		
 		proto.destroyOnClose = function(value){

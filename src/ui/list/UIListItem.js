@@ -7,13 +7,16 @@ a5.Package('a5.cl.ui.list')
 	.Extends('a5.cl.ui.UIAccordionPanel')
 	.Prototype('UIListItem', function(proto, im){
 		
-		proto.UIListItem = function(label, data){
+		this.Properties(function(){
 			this._cl_data = null;
 			this._cl_subList = null;
 			this._cl_expandable = false;
 			this._cl_expandedSize = 40;
 			this._cl_collapsedSize = 40;
 			this._cl_pendingSubList = null;
+		})
+		
+		proto.UIListItem = function(label, data){
 			proto.superclass(this);
 		}
 				

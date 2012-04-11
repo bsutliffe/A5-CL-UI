@@ -107,7 +107,7 @@ a5.Package('a5.cl.ui')
 		["a5.Contract", {panel:'a5.cl.ui.UIAccordionPanel', index:'number'}], 
 		function(args){
 			if(args){
-				this.addSubViewAtIndex(args.panel, index);
+				this.addSubViewAtIndex(args.panel, args.index);
 				this.build();
 			}
 		})

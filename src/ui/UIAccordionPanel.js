@@ -9,13 +9,16 @@ a5.Package('a5.cl.ui')
 	.Extends('UIControl')
 	.Prototype('UIAccordionPanel', function(proto, im){
 		
-		proto.UIAccordionPanel = function(){
-			proto.superclass(this);
+		this.Properties(function(){
 			this._cl_expanded = true;
 			this._cl_expandedSize = 100;
 			this._cl_collapsedSize = 30;
 			this._cl_accordion = null;
 			this._cl_collapsible = true;
+		})
+		
+		proto.UIAccordionPanel = function(){
+			proto.superclass(this);
 			this.initHandle();
 		}
 		

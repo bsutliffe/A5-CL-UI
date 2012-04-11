@@ -44,10 +44,20 @@ a5.Package('a5.cl.ui.core')
 				orientation: this.cl().clientOrientation()
 			}), prop;
 			for(prop in styles){
-				if(typeof obj[prop] === 'function')
-					obj[prop].apply(obj, styles[prop]);
-				else if(obj.hasOwnProperty(prop))
-					obj[prop] = styles[prop][0];
+				var spl = prop.split('_'),
+					checkedProp,
+					checkedObj = obj;
+				if (spl.length > 1) {
+					checkedProp = spl.pop();
+					for(var i = 0, l = spl.length; i<l; i++)
+						checkedObj = checkedObj[spl[i]]();
+				} else {
+					checkedProp = spl[0];
+				}
+				if(typeof checkedObj[checkedProp] === 'function')
+					checkedObj[checkedProp].apply(checkedObj, styles[prop]);
+				else if(checkedObj.hasOwnProperty(checkedProp))
+					checkedObj[checkedProp] = styles[prop][0];
 			}
 		}
 });

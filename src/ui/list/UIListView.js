@@ -59,7 +59,7 @@ a5.Package('a5.cl.ui.list')
 		proto.addItemAtIndex = function(listItem, index){
 			if(listItem instanceof im.UIListItem){
 				this._cl_locked(false);
-				this.addPanel(listItem);
+				this.addPanelAtIndex(listItem, index);
 				this._cl_locked(true);
 			}
 		}
@@ -68,10 +68,10 @@ a5.Package('a5.cl.ui.list')
 		 * 
 		 * @param {a5.cl.ui.list.UIListItem} listItem
 		 */
-		proto.removeItem = function(listItem){
+		proto.removeItem = function(listItem, shouldDestroy){
 			if(listItem instanceof im.UIListItem){
 				this._cl_locked(false);
-				this.removeSubView(listItem);
+				this.removeSubView(listItem, shouldDestroy);
 				this._cl_locked(true);
 			}
 		}
@@ -80,16 +80,16 @@ a5.Package('a5.cl.ui.list')
 		 * 
 		 * @param {Number} index
 		 */
-		proto.removeItemAtIndex = function(index){
-			this.removeItem(this.subViewAtIndex(index));
+		proto.removeItemAtIndex = function(index, shouldDestroy){
+			this.removeItem(this.subViewAtIndex(index), shouldDestroy);
 		}
 		
 		/**
 		 * 
 		 */
-		proto.removeAllItems = function(){
+		proto.removeAllItems = function(shouldDestroy){
 			this._cl_locked(false);
-			this.removeAllSubViews();
+			this.removeAllSubViews(shouldDestroy);
 			this._cl_locked(true);
 		}
 		
