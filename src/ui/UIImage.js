@@ -83,6 +83,14 @@ a5.Package('a5.cl.ui')
 			}
 		}
 		
+		proto.isBase64 = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_isBase64 = value;
+				return this;
+			}
+			return this._cl_isBase64;
+		}
+		
 		proto._cl_updateImgSize = function(){
 			if(!this._cl_imgLoaded) return;
 			var imgWidth = 0, imgHeight = 0,

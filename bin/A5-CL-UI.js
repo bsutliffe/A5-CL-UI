@@ -350,15 +350,21 @@ a5.Package('a5.cl.ui.core')
 					checkedObj = obj;
 				if (spl.length > 1) {
 					checkedProp = spl.pop();
-					for(var i = 0, l = spl.length; i<l; i++)
-						checkedObj = checkedObj[spl[i]]();
+					for (var i = 0, l = spl.length; i < l; i++) {
+						if(spl[i].substr(0, 5) === 'CHILD'){
+							checkedObj = checkedObj.getChildView(spl[i].substr(5));
+						} else
+							checkedObj = checkedObj[spl[i]]();
+					}
 				} else {
 					checkedProp = spl[0];
 				}
-				if(typeof checkedObj[checkedProp] === 'function')
-					checkedObj[checkedProp].apply(checkedObj, styles[prop]);
-				else if(checkedObj.hasOwnProperty(checkedProp))
-					checkedObj[checkedProp] = styles[prop][0];
+				if (checkedObj) {
+					if (typeof checkedObj[checkedProp] === 'function') 
+						checkedObj[checkedProp].apply(checkedObj, styles[prop]);
+					else if (checkedObj.hasOwnProperty(checkedProp)) 
+						checkedObj[checkedProp] = styles[prop][0];
+				}
 			}
 		}
 });
@@ -850,7 +856,9 @@ a5.Package('a5.cl.ui.mixins')
  * @name a5.cl.ui.mixins.UIThemable
  */
 a5.Package('a5.cl.ui.mixins')
-	.Import('a5.cl.ui.core.ThemeManager')
+	.Import('a5.cl.ui.core.ThemeManager',
+			'a5.cl.mvc.CLViewEvent',
+			'a5.cl.mvc.CLViewContainerEvent')
 	.Mixin('UIThemable', function(proto, im){
 		
 		this.MustExtend('a5.cl.CLView');
@@ -865,7 +873,14 @@ a5.Package('a5.cl.ui.mixins')
 		}
 		
 		proto.mixinReady = function(){
-			this._cl_applyTheme();
+			var self = this;
+			if (this.viewIsReady()) {
+				this._cl_applyTheme();
+			} else {
+				this.addEventListener((this instanceof a5.cl.CLViewContainer ? im.CLViewContainerEvent.CHILDREN_READY : im.CLViewEvent.VIEW_READY), function(){
+					self._cl_applyTheme();
+				})
+			}
 		}
 		
 		proto.themeVariant = function(value){
@@ -1216,6 +1231,14 @@ a5.Package('a5.cl.ui')
 				self.drawHTML(self._cl_imgElement);
 				self.redraw();
 			}
+		}
+		
+		proto.isBase64 = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_isBase64 = value;
+				return this;
+			}
+			return this._cl_isBase64;
 		}
 		
 		proto._cl_updateImgSize = function(){
@@ -3588,7 +3611,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
 			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
-			this.height('auto');//.relX(true);
+			this.height('auto').relX(true);
 			if(typeof text === 'string') this.value(text);
 			
 			this.addEventListener(im.UIEvent.FOCUS, this._cl_eFocusHandler, false, this);
@@ -4486,6 +4509,7 @@ a5.Package('a5.cl.ui.form')
 			var opt = this.getOptionAtIndex(index);
 			if(opt)
 				this.selectedOption(opt);
+			this._cl_select.onchange();
 		}
 		
 		/**

@@ -49,15 +49,21 @@ a5.Package('a5.cl.ui.core')
 					checkedObj = obj;
 				if (spl.length > 1) {
 					checkedProp = spl.pop();
-					for(var i = 0, l = spl.length; i<l; i++)
-						checkedObj = checkedObj[spl[i]]();
+					for (var i = 0, l = spl.length; i < l; i++) {
+						if(spl[i].substr(0, 5) === 'CHILD'){
+							checkedObj = checkedObj.getChildView(spl[i].substr(5));
+						} else
+							checkedObj = checkedObj[spl[i]]();
+					}
 				} else {
 					checkedProp = spl[0];
 				}
-				if(typeof checkedObj[checkedProp] === 'function')
-					checkedObj[checkedProp].apply(checkedObj, styles[prop]);
-				else if(checkedObj.hasOwnProperty(checkedProp))
-					checkedObj[checkedProp] = styles[prop][0];
+				if (checkedObj) {
+					if (typeof checkedObj[checkedProp] === 'function') 
+						checkedObj[checkedProp].apply(checkedObj, styles[prop]);
+					else if (checkedObj.hasOwnProperty(checkedProp)) 
+						checkedObj[checkedProp] = styles[prop][0];
+				}
 			}
 		}
 });
