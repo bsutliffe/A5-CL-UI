@@ -1218,6 +1218,14 @@ a5.Package('a5.cl.ui')
 			}
 		}
 		
+		proto.isBase64 = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_isBase64 = value;
+				return this;
+			}
+			return this._cl_isBase64;
+		}
+		
 		proto._cl_updateImgSize = function(){
 			if(!this._cl_imgLoaded) return;
 			var imgWidth = 0, imgHeight = 0,
@@ -2668,7 +2676,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_pendingTabs = 0;
 		})
 		
-		proto.UITabViewController = function(){
+		proto.UITabViewController = function(def){
 			this._cl_tabBarView = this.create(im.CLViewContainer);
 			this._cl_tabBarBG = this.create(im.CLViewContainer);
 			this._cl_tabBarWrapper = this.create(im.CLViewContainer);
@@ -2677,7 +2685,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarWrapper.height(25);
 			this._cl_tabBarView.relX(true);
 			this._cl_contentView.height('-25');
-			proto.superclass(this, [this.create(a5.cl.ui.UIContainer)]);
+			proto.superclass(this, [def || this.create(a5.cl.ui.UIContainer)]);
 		}
 		
 		proto.Override.viewReady = function(){
@@ -4611,6 +4619,49 @@ a5.Package('a5.cl.ui.form')
 
 
 a5.Package('a5.cl.ui.form')
+
+	.Extends('UIFormElement')
+	.Prototype('UIRange', function(proto, im){
+		
+		proto.UIRange = function(){
+			proto.superclass(this, arguments);
+			this._cl_element = document.createElement('input');
+			this._cl_element.type = 'range';
+			this._cl_element.min = 0;
+			this._cl_element.max = 100;
+			this._cl_element.style.width = '100%';
+			this.inputView().appendChild(this._cl_element);
+		}
+		
+		
+		proto.minValue = function(value){
+			if(value !== undefined){
+				this._cl_element.min = value;
+				return this;
+			}
+			return this._cl_element.min;
+		}
+		
+		proto.maxValue = function(value){
+			if(value !== undefined){
+				this._cl_element.max = value;
+				return this;
+			}
+			return this._cl_element.max;
+		}
+		
+		proto.Override.value = function(value){
+			proto.superclass().value.call(this, arguments);
+			if(value !== undefined){
+				this._cl_element.value = value;
+				return this;
+			}
+			return this._cl_element.value;
+		}		
+})
+
+
+a5.Package('a5.cl.ui.form')
 	.Extends('UIFormElement')
 	.Prototype('UIFileInput', function(proto, im, UIFileInput){
 		
@@ -4975,6 +5026,59 @@ a5.Package('a5.cl.ui.buttons')
 			this._cl_viewElement.onmouseover = this._cl_viewElement.onmouseout = null;
 		}	
 });
+
+
+a5.Package('a5.cl.ui.buttons')
+
+	.Extends('UIButton')
+	.Prototype('UIToggleButton', function(proto, im, UIToggleButton){
+		
+		UIToggleButton.themeDefaults = {
+			padding:{left:5, right:5},
+			backgroundColor:'transparent'
+		};
+		
+		
+		var Private = this.PrivateProperties(function(){
+			this.toggled = false;
+		})
+		
+		proto.UIToggleButton = function(toggled){
+			proto.superclass(this);
+			Private(this).toggled = toggled;
+		}
+		
+		proto.Override.childrenReady = function(){
+			this._cl_setToggle(Private(this).toggled);
+		}
+		
+		proto.Override._cl_onMouseClick = function(e){
+			this._cl_setToggle(!Private(this).toggled);
+			proto.superclass()._cl_onMouseClick.call(this, e);
+		}
+		
+		proto.toggled = function(value){
+			if(value !== undefined){
+				this._cl_setToggle(value);
+			}
+			//TODO: forced ! because events are not fired here first
+			return !Private(this).toggled;
+		}
+		
+		proto._cl_setToggle = function(value){
+			Private(this).toggled = value;
+			this.toggledView().visible(value);
+			this.untoggledView().visible(!value);
+		}
+		
+		proto.untoggledView = function(){
+			return this.subViewAtIndex(0);
+		}
+		
+		proto.toggledView = function(){
+			return this.subViewAtIndex(1);
+		}
+})
 
 
 a5.Package('a5.cl.ui.modals')

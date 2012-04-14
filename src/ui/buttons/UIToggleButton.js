@@ -2,7 +2,14 @@
 a5.Package('a5.cl.ui.buttons')
 
 	.Extends('UIButton')
-	.Prototype('UIToggleButton', function(proto, im){
+	.Prototype('UIToggleButton', function(proto, im, UIToggleButton){
+		
+		UIToggleButton.themeDefaults = {
+			padding:{left:5, right:5},
+			backgroundColor:'transparent',
+			border:0
+		};
+		
 		
 		var Private = this.PrivateProperties(function(){
 			this.toggled = false;
@@ -13,14 +20,11 @@ a5.Package('a5.cl.ui.buttons')
 			Private(this).toggled = toggled;
 		}
 		
-		proto.childrenReady = function(){
+		proto.Override.childrenReady = function(){
 			this._cl_setToggle(Private(this).toggled);
-			this.upColor('transparent').overColor('transparent')
-				.downColor('transparent').borderWidth(0)
-				.upBorder(0).overBorder(0).downBorder(0);
 		}
 		
-		proto._cl_onMouseClick = function(e){
+		proto.Override._cl_onMouseClick = function(e){
 			this._cl_setToggle(!Private(this).toggled);
 			proto.superclass()._cl_onMouseClick.call(this, e);
 		}

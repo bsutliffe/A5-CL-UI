@@ -31,7 +31,7 @@ a5.Package('a5.cl.ui.form')
 			return this._cl_element.max;
 		}
 		
-		proto.value = function(value){
+		proto.Override.value = function(value){
 			proto.superclass().value.call(this, arguments);
 			if(value !== undefined){
 				this._cl_element.value = value;
