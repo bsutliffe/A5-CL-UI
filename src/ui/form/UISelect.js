@@ -418,6 +418,7 @@ a5.Package('a5.cl.ui.form')
 			var opt = this.getOptionAtIndex(index);
 			if(opt)
 				this.selectedOption(opt);
+			this._cl_select.onchange();
 		}
 		
 		/**

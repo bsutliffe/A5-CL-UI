@@ -4,7 +4,9 @@
  * @name a5.cl.ui.mixins.UIThemable
  */
 a5.Package('a5.cl.ui.mixins')
-	.Import('a5.cl.ui.core.ThemeManager')
+	.Import('a5.cl.ui.core.ThemeManager',
+			'a5.cl.mvc.CLViewEvent',
+			'a5.cl.mvc.CLViewContainerEvent')
 	.Mixin('UIThemable', function(proto, im){
 		
 		this.MustExtend('a5.cl.CLView');
@@ -19,7 +21,14 @@ a5.Package('a5.cl.ui.mixins')
 		}
 		
 		proto.mixinReady = function(){
-			this._cl_applyTheme();
+			var self = this;
+			if (this.viewIsReady()) {
+				this._cl_applyTheme();
+			} else {
+				this.addEventListener((this instanceof a5.cl.CLViewContainer ? im.CLViewContainerEvent.CHILDREN_READY : im.CLViewEvent.VIEW_READY), function(){
+					self._cl_applyTheme();
+				})
+			}
 		}
 		
 		proto.themeVariant = function(value){
