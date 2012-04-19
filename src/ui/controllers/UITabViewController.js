@@ -26,7 +26,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_pendingTabs = 0;
 		})
 		
-		proto.UITabViewController = function(){
+		proto.UITabViewController = function(def){
 			this._cl_tabBarView = this.create(im.CLViewContainer);
 			this._cl_tabBarBG = this.create(im.CLViewContainer);
 			this._cl_tabBarWrapper = this.create(im.CLViewContainer);
@@ -35,7 +35,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarWrapper.height(25);
 			this._cl_tabBarView.relX(true);
 			this._cl_contentView.height('-25');
-			proto.superclass(this, [this.create(a5.cl.ui.UIContainer)]);
+			proto.superclass(this, [def || this.create(a5.cl.ui.UIContainer)]);
 		}
 		
 		proto.Override.viewReady = function(){
@@ -45,6 +45,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarWrapper.addSubView(this._cl_tabBarView);
 			this.view().addSubView(this._cl_tabBarWrapper);
 			this.view().addSubView(this._cl_contentView);
+			this._cl_viewReady();
 			/*
 			var self = this;
 			this.view().childrenReady = function(initial){
@@ -339,7 +340,6 @@ a5.Package('a5.cl.ui.controllers')
 					builder.build(function(view){
 						this.addTabAtIndex(view, targetIndex, node.label);
 						this._cl_pendingTabs--;
-						this._cl_viewReady();
 					}, null, this);
 				}
 			} else

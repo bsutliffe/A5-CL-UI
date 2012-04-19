@@ -35,9 +35,11 @@ src/ui/form/UIFormElement.js
 src/ui/form/UIInputField.js
 src/ui/form/UIOptionButton.js
 src/ui/form/UISelect.js
+src/ui/form/UIRange.js
 src/ui/form/UIFileInput.js
 src/ui/form/UIForm.js
 src/ui/buttons/UIButton.js
+src/ui/buttons/UIToggleButton.js
 src/ui/modals/UIModal.js
 src/ui/modals/UILightBox.js
 src/ui/modals/UIContextMenuWindow.js
