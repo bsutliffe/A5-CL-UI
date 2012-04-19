@@ -33,7 +33,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.UIFormElement = function(){
 			proto.superclass(this);
-			
+			this.width('100%');
 			this.addSubView(this._cl_inputView);
 			this.addEventListener(im.UIEvent.CHANGE, this._cl_eChangeEventHandler, false, this);
 		}
@@ -109,9 +109,11 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.validate = function(){
 			this._cl_validationStates = [];
-			var isValid = this._cl_validate();
-			if(this.required() && !this._cl_validateRequired())
-				isValid = false;
+			var isValid = true;
+			if(this.required())
+				isValid = this._cl_validateRequired();
+			if(isValid && (this.required() || !this.required() && this.value()))
+				isValid = this._cl_validate();
 			this.validityChanged(isValid);
 			return isValid;
 		}

@@ -149,14 +149,14 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto._cl_eContinueButtonHandler = function(e){
-			this.close();
 			if(typeof this._cl_onContinue === 'function')
 				this._cl_onContinue.call(this._cl_callbackScope);
+			this.close();
 		}
 		
 		proto._cl_eCancelButtonHandler = function(e){
-			this.close();
 			if(typeof this._cl_onCancel === 'function')
 				this._cl_onCancel.call(this._cl_callbackScope);
+			this.close();
 		}
 });

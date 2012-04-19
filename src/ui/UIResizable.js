@@ -12,7 +12,7 @@ a5.Package('a5.cl.ui')
 		
 		
 		proto.UIResizable = function(coordinates){
-			this._cl_contentView = this.create(a5.cl.ui.UIControl);
+			this._cl_contentView = this.create(a5.cl.ui.UIControl).width('100%').height('100%');
 			this._cl_handles = {};
 			if(typeof coordinates == 'string'){
 				this._cl_coordinates = [];

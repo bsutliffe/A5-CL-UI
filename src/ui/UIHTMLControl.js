@@ -12,8 +12,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIHTMLControl = function(){
 			proto.superclass(this);
-			this.usePointer(false)
-				.clickHandlingEnabled(false);
+			this.usePointer(false).width('auto').height('auto').clickHandlingEnabled(false);
 		}
 		
 });

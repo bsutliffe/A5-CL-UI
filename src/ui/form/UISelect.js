@@ -47,6 +47,7 @@ a5.Package('a5.cl.ui.form')
 			sel.id = this.instanceUID() + '_select';
 			sel.style.width = '100%';
 			sel.style.border = 'none';
+			sel.disabled = !this._cl_enabled ? 'disabled' : null;
 			sel.style.backgroundColor = 'transparent';
 			sel.multiple = this._cl_selectMultiple;
 			this._cl_addFocusEvents(sel);
@@ -512,7 +513,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.Override.enabled = function(value){
 			if (typeof value === 'boolean') {
-				if(this._cl_select) this._cl_select.disabled = value;
+				if(this._cl_select) this._cl_select.disabled = !value;
 				this._cl_enabled = value;
 			}
 			return this._cl_enabled;

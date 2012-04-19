@@ -19,6 +19,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIAccordionPanel = function(){
 			proto.superclass(this);
+			this.width('100%');
 			this.initHandle();
 		}
 		

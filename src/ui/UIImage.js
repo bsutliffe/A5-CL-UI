@@ -65,7 +65,14 @@ a5.Package('a5.cl.ui')
 				};
 			this._cl_imgLoaded = false;
 			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
-			if (!this._cl_isBG) {
+			if(!this._cl_src){
+				this._cl_imgElement.src = "";
+				self._cl_nativeWidth = 0;
+				self._cl_nativeHeight = 0;
+				self._cl_updateImgSize();
+				self.drawHTML(self._cl_imgElement);
+				self.redraw();
+			}else if (!this._cl_isBG) {
 				this._cl_imgElement.style.visibility = 'hidden';
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
@@ -73,13 +80,6 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
-			}
-			if(!this._cl_src){
-				self._cl_nativeWidth = 0 || self._cl_imgElement.width;
-				self._cl_nativeHeight = 0 || self._cl_imgElement.height;
-				self._cl_updateImgSize();
-				self.drawHTML(self._cl_imgElement);
-				self.redraw();
 			}
 		}
 		

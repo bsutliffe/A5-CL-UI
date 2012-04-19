@@ -10,8 +10,6 @@ a5.Package('a5.cl.ui.form')
 			this._cl_element.type = 'file';
 			this._cl_element.id = this.instanceUID() + '_field';
 			this._cl_element.style.width = '100%';
-			
-			this.width('100%').height('auto');
 		}
 		
 		proto.Override.viewReady = function(){
