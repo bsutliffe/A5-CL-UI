@@ -39,10 +39,9 @@ a5.Package('a5.cl.ui.buttons')
 			this._cl_labelView = this.create(im.UITextField);
 			this._cl_data = null;
 			this._cl_state = 'up';
-			
-			this._cl_labelView.width('100%')
-				.textAlign('center')
+			this._cl_labelView.width('auto')
 				.alignY('middle')
+				.alignX('center')
 				.nonBreaking(true);
 			this.usePointer(true);
 			this.clickEnabled(true);
