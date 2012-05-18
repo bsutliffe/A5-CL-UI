@@ -1,4 +1,3 @@
-
 a5.Package('a5.cl.ui.table')
 	.Import('a5.cl.ui.*')
 	.Extends('UITableCell')

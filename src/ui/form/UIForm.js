@@ -40,9 +40,9 @@ a5.Package('a5.cl.ui.form')
 				x, y, thisElem, optGroup;
 			for(x = 0, y = this._cl_elements.length; x < y; x++){
 				thisElem = this._cl_elements[x];
-				if(thisElem instanceof im.UIOptionButton){
+				if (thisElem instanceof im.UIOptionButton) {
 					optGroup = thisElem.optionGroup();
-					if(optGroup)
+					if (optGroup) 
 						thisElem = optGroup;
 					else {
 						data[thisElem.name()] = thisElem.selected();
@@ -128,18 +128,21 @@ a5.Package('a5.cl.ui.form')
 				return;
 			}
 			if(view instanceof im.UIFormElement) {
-				switch (e.type()) {
-					case im.CLEvent.ADDED_TO_PARENT:
-						view._cl_form = this;
-						this._cl_elements.push(view);
-						break;
-					case im.CLEvent.REMOVED_FROM_PARENT:
-						index = im.Utils.arrayIndexOf(this._cl_elements, view);
-						if (index > -1) {
-							this._cl_elements.splice(index, 1);
-							view._cl_form = null;
-						}
-						break;
+				if (view.includeInParentForm()) {
+					switch (e.type()) {
+						case im.CLEvent.ADDED_TO_PARENT:
+							view._cl_form = this;
+							this._cl_elements.push(view);
+							break;
+						case im.CLEvent.REMOVED_FROM_PARENT:
+							console.log(view.instanceUID())
+							index = im.Utils.arrayIndexOf(this._cl_elements, view);
+							if (index > -1) {
+								this._cl_elements.splice(index, 1);
+								view._cl_form = null;
+							}
+							break;
+					}
 				}
 			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children

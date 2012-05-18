@@ -23,6 +23,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_validation = null;
 			this._cl_validateOnChange = false;
 			this._cl_validateOnBlur = false;
+			this._cl_includeInParentForm = true;
 			this._cl_value = null;
 			this._cl_form = null;
 			this._cl_changeEvent = this.create(im.UIEvent, [im.UIEvent.CHANGE]).shouldRetain(true);
@@ -49,6 +50,14 @@ a5.Package('a5.cl.ui.form')
 				return this;
 			}
 			return this._cl_name || this.id().replace(/[^a-z0-9_]/gi, '');
+		}
+		
+		proto.includeInParentForm = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_includeInParentForm = value;
+				return this;
+			}
+			return this._cl_includeInParentForm;
 		}
 		
 		proto.value = function(value){

@@ -37,6 +37,7 @@ src/ui/form/UIOptionButton.js
 src/ui/form/UISelect.js
 src/ui/form/UIRange.js
 src/ui/form/UIFileInput.js
+src/ui/form/UIDateSelect.js
 src/ui/form/UIForm.js
 src/ui/buttons/UIButton.js
 src/ui/buttons/UIToggleButton.js

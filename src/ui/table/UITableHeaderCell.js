@@ -1,4 +1,3 @@
-
 /**
  * @class Acts as a cell within a UITableHeader.
  * @name a5.cl.ui.table.UITableHeaderCell
@@ -182,7 +181,7 @@ a5.Package('a5.cl.ui.table')
 		}
 		
 		proto.Override._cl_render = function(){
-			
+			proto.superclass()._cl_render.call(this);
 		}
 		
 		proto.Override.backgroundColor = function(value){

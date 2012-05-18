@@ -87,9 +87,12 @@ a5.Package('a5.cl.ui.table')
 		}
 		
 		proto.Override._cl_redraw = function(force, suppressRender){
-			var redrawVals = proto.superclass()._cl_redraw.call(this, true, false);
-			im.CLView._cl_updateWH(this, this._cl_viewElement.offsetWidth, 'width', this.x(true), this._cl_minWidth, this._cl_maxWidth, this._cl_width);
-			im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), this._cl_minHeight, this._cl_maxHeight, this._cl_height);
+			//var redrawVals = proto.superclass()._cl_redraw.call(this, true, true);
+			//this._cl_updateColumnWidths();
+			proto.superclass()._cl_redraw.call(this, force, suppressRender);
+			
+			//im.CLView._cl_updateWH(this, this._cl_viewElement.offsetWidth, 'width', this.x(true), this._cl_minWidth, this._cl_maxWidth, this._cl_width);
+			//im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), this._cl_minHeight, this._cl_maxHeight, this._cl_height);
 			
 			/*if(redrawVals.shouldRedraw){
 				var autoHeights = false;

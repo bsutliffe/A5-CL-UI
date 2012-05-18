@@ -20,7 +20,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_minValidIndex = 0;
 			
 			this.height('auto');
-			this.inputView().width(200).height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
+			this.inputView().width('100%').height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			
 			//if options were passed in a5.Create, add them now.
 			if(options instanceof Array)
@@ -351,16 +351,23 @@ a5.Package('a5.cl.ui.form')
 		/**
 		 * Gets or sets the option that is currently selected, or null if none is selected.
 		 * 
-		 * @param value {Object} An object with 'value' and/or 'label' properties corresponding to the option that should be selected.
+		 * @param value {Number|Object} the index of the selection or an object with 'value' and/or 'label' properties corresponding to the option that should be selected.
 		 * @return {Object}	The currently selected option.
 		 */
 		proto.selectedOption = function(value){
-			var setting = (typeof value === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label')));
-			var checkLabel = setting && value.hasOwnProperty('label');
-			var checkValue = setting && value.hasOwnProperty('value');
+			var type = typeof value;
+			var setting = type == 'number' || (type === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label')));
+			var checkLabel = setting && type === 'object' && value.hasOwnProperty('label');
+			var checkValue = setting && type === 'object' && value.hasOwnProperty('value');
+			var checkIndex = setting && type === 'number';
 				
 			var selectedIndex = this._cl_select.selectedIndex;
 			if(selectedIndex < 0 && !setting) return null;
+			
+			if(checkIndex && value < 0){
+				this._cl_select.selectedIndex = -1;
+				return null;
+			}
 			
 			var i = -1;
 			for (var x = 0, xl = this._cl_options.length; x < xl; x++) {
@@ -372,7 +379,7 @@ a5.Package('a5.cl.ui.form')
 						if (setting) {
 							var labelMatch = checkLabel ? (grpItem.label === value.label) : true;
 							var valueMatch = checkValue ? (grpItem.value === value.value) : true;
-							if(labelMatch && valueMatch){
+							if(checkIndex ? (i === value) : (labelMatch && valueMatch)){
 								this._cl_select.selectedIndex = i;
 								return this;
 							}
@@ -385,7 +392,7 @@ a5.Package('a5.cl.ui.form')
 					if (setting) {
 						var labelMatch = checkLabel ? (item.label === value.label) : true;
 						var valueMatch = checkValue ? (item.value === value.value) : true;
-						if(labelMatch && valueMatch){
+						if(checkIndex ? (i === value) : (labelMatch && valueMatch)){
 							this._cl_select.selectedIndex = i;
 							return this;
 						}

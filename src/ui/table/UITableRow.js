@@ -18,7 +18,7 @@ a5.Package('a5.cl.ui.table')
 		proto.UITableRow = function(){
 			proto.superclass(this);
 			this._cl_cells = [];
-			this.height('auto').relX(true);
+			this.height('auto').width('100%').relX(true);
 			this._cl_autoHeight = true;
 			
 			this._cl_viewElement.style.position = 'relative';

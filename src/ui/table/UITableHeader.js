@@ -1,4 +1,3 @@
-
 /**
  * @class The header row within a UITableView.  This is like a UITableRow, but can only contain UITableHeaderCells.
  * @name a5.cl.ui.table.UITableHeader
