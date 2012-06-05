@@ -19,6 +19,8 @@ a5.Package('a5.cl.ui.table')
 		
 		proto.UITableView = function(){
 			proto.superclass(this);
+			if(this._cl_height.value == 'auto')
+                im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), null, null, this._cl_height);
 			this._cl_rows = [];
 			this._cl_cols = [];
 			this._cl_header = null;
