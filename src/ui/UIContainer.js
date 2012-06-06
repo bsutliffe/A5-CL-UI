@@ -13,6 +13,7 @@ a5.Package('a5.cl.ui')
 			proto.superclass(this);
 			this.relX(true);
 			this.constrainChildren(false);
+			this.width('100%');
 		}
 		
 		proto.Override.constrainChildren = function(){}

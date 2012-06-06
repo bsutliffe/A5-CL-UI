@@ -21,7 +21,7 @@ a5.Package('a5.cl.ui')
 			this._cl_fontFamily = null;
 			this._cl_formElement = null;
 			this._cl_element = this.htmlWrapper();
-			this.height('auto');
+			this.width('100%').height('auto');
 			this.fontFamily('Arial');
 			if(typeof text === 'string')
 				this.text(text);
