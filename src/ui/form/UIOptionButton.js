@@ -60,6 +60,12 @@ a5.Package('a5.cl.ui.form')
 			this.validityChanged(true);
 		}
 		
+		proto.Override.enabled = function(value){
+			if(typeof value == 'boolean' && this._cl_input)
+				this._cl_input.disabled = !value;
+			return this.superclass().enabled.apply(this, arguments);
+		}
+		
 		proto.Override._cl_validateRequired = function(){
 			var isValid = true;
 			if((this._cl_optionGroup && !this._cl_optionGroup.selectedOption()) || (!this._cl_optionGroup && !this.selected())){
@@ -75,6 +81,7 @@ a5.Package('a5.cl.ui.form')
 			input.type = type;
 			input.name = this.instanceUID();
 			input.checked = checked === true;
+			input.disabled = !this._cl_enabled;
 			var self = this;
 			input.onchange = function(){
 				self.selected(this.checked);
