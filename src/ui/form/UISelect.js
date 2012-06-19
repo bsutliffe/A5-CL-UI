@@ -73,6 +73,7 @@ a5.Package('a5.cl.ui.form')
 					opt = document.createElement('option');
 					opt.innerHTML = item.label;
 					opt.value = item.value + '';
+					opt.title = item.title + '';
 				}
 				//add the item to the select
 				sel.appendChild(opt);
@@ -123,13 +124,13 @@ a5.Package('a5.cl.ui.form')
 		
 		/** @private */
 		proto._cl_addOptionsFromData = function(options){
-			if(options instanceof Array){
+			if(a5.cl.core.Utils.isArray(options)){
 				for(var x = 0, y = options.length; x < y; x++){
 					var opt = options[x];
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value);
+						this.addOption(opt.label, opt.value, null, opt.title);
 				}
 			}
 		}
@@ -140,10 +141,11 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} label	The text to be displayed by the option.
 		 * @param {Object} value	The value of the option.  Can be any type.
 		 * @param {String} [group]	The label of the group that this option should be added to.
+		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group){
+		proto.addOption = function(label, value, group, title){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, -1, group);
+			this._cl_addOptionAtIndex(label, value, -1, group, title);
 			//redraw the select
 			this._cl_redrawSelect();
 		}
@@ -155,16 +157,17 @@ a5.Package('a5.cl.ui.form')
 		 * @param {Object} value	The value of the option.  Can be any type.
 		 * @param {Number} index	The index at which this option should be inserted (relative to the group, if one is specified).
 		 * @param {String} [group]	The label of the group that this option should be added to.
+		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOptionAtIndex = function(label, value, index, group){
+		proto.addOptionAtIndex = function(label, value, index, group, title){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, index, group);
+			this._cl_addOptionAtIndex(label, value, index, group, title);
 			//redraw the select
 			this._cl_redrawSelect();
 		}
 		
 		/** @private */
-		proto._cl_addOptionAtIndex = function(label, value, index, group){
+		proto._cl_addOptionAtIndex = function(label, value, index, group, title){
 			if(typeof group === 'string' && typeof index === 'number'){
 				//if a group was specified, add the option to that group
 				var grp = this._cl_findGroup(group);
@@ -181,7 +184,7 @@ a5.Package('a5.cl.ui.form')
 				//validate the index
 				if(index < 0 || index > this._cl_options.length) index = this._cl_options.length;
 				//add it to the array at the specified index
-				this._cl_options.splice(index, 0, {label:label, value:value});
+				this._cl_options.splice(index, 0, {label:label, value:value, title:title});
 			}
 		}
 		
@@ -355,13 +358,16 @@ a5.Package('a5.cl.ui.form')
 		 * @return {Object}	The currently selected option.
 		 */
 		proto.selectedOption = function(value){
-			var type = typeof value;
-			var setting = type == 'number' || (type === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label')));
-			var checkLabel = setting && type === 'object' && value.hasOwnProperty('label');
-			var checkValue = setting && type === 'object' && value.hasOwnProperty('value');
-			var checkIndex = setting && type === 'number';
+			var type = typeof value,
+				setting = type == 'number' || (type === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label'))),
+				checkLabel = setting && type === 'object' && value.hasOwnProperty('label'),
+				checkValue = setting && type === 'object' && value.hasOwnProperty('value'),
+				checkIndex = setting && type === 'number',
+				selectedIndex = this._cl_select.selectedIndex,
+				i = -1,
+				selectedOptions = [],
+				x, xl, y, yl, item, grpItem, labelMatch, valueMatch;
 				
-			var selectedIndex = this._cl_select.selectedIndex;
 			if(selectedIndex < 0 && !setting) return null;
 			
 			if(checkIndex && value < 0){
@@ -369,44 +375,64 @@ a5.Package('a5.cl.ui.form')
 				return null;
 			}
 			
-			var i = -1;
-			for (var x = 0, xl = this._cl_options.length; x < xl; x++) {
-				var item = this._cl_options[x];
+			if(this._cl_selectMultiple){
+				selectedIndex = [];
+				for(x = 0, y = this._cl_select.options.length; x < y; x++){
+					if(this._cl_select.options[x].selected)
+						selectedIndex.push(x);
+				}
+			}
+			
+			for (x = 0, xl = this._cl_options.length; x < xl; x++) {
+				item = this._cl_options[x];
 				if (item.isGroup) {
-					for (var y = 0, yl = item.options.length; y < yl; y++) {
+					for (y = 0, yl = item.options.length; y < yl; y++) {
 						i++;
-						var grpItem = item.options[y];
+						grpItem = item.options[y];
 						if (setting) {
-							var labelMatch = checkLabel ? (grpItem.label === value.label) : true;
-							var valueMatch = checkValue ? (grpItem.value === value.value) : true;
-							if(checkIndex ? (i === value) : (labelMatch && valueMatch)){
+							labelMatch = checkLabel ? (grpItem.label === value.label) : true;
+							valueMatch = checkValue ? (grpItem.value === value.value) : true;
+							if (checkIndex ? (i === value) : (labelMatch && valueMatch)) {
 								this._cl_select.selectedIndex = i;
 								return this;
 							}
 						} else if (i === selectedIndex) {
 							return grpItem;
+						} else if (a5.cl.core.Utils.arrayContains(selectedIndex, i)) {
+							selectedOptions.push(grpItem);
 						}
 					}
 				} else {
 					i++
 					if (setting) {
-						var labelMatch = checkLabel ? (item.label === value.label) : true;
-						var valueMatch = checkValue ? (item.value === value.value) : true;
+						labelMatch = checkLabel ? (item.label === value.label) : true;
+						valueMatch = checkValue ? (item.value === value.value) : true;
 						if(checkIndex ? (i === value) : (labelMatch && valueMatch)){
 							this._cl_select.selectedIndex = i;
 							return this;
 						}
 					} else if (i === selectedIndex) {
 						return item;
+					} else if(a5.cl.core.Utils.arrayContains(selectedIndex, i)){
+						selectedOptions.push(item);
 					}
 				}
 			}
+			if(this._cl_selectMultiple)
+				return selectedOptions
 			return null;
 		}
 		
 		proto.Override.value = function(){
 			var selectedOpt = this.selectedOption();
-			return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null ;
+			if(!a5.cl.core.Utils.isArray(selectedOpt))
+				return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null ;
+			var data = [],
+				x, y;
+			for(x = 0, y = selectedOpt.length; x < y; x++){
+				data.push(selectedOpt[x].value || selectedOpt[x].label);
+			}
+			return data;
 		}
 		
 		proto.Override._cl_validateRequired = function(){
@@ -495,7 +521,7 @@ a5.Package('a5.cl.ui.form')
 				if(this._cl_select) this._cl_select.multiple = value;
 				this._cl_selectMultiple = value;
 			}
-			return this._cl_select.multiple;
+			return this._cl_selectMultiple;
 		}
 		
 		/**
@@ -534,7 +560,7 @@ a5.Package('a5.cl.ui.form')
 			proto.superclass().processCustomViewDefNode.apply(this, arguments);
 			switch(nodeName){
 				case 'Option':
-					this.addOption(node.label, node.value, node.group);
+					this.addOption(node.label, node.value, node.group, node.title);
 					break;
 				case 'Group':
 					this.addGroup(node.label);
