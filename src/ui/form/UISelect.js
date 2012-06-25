@@ -19,7 +19,8 @@ a5.Package('a5.cl.ui.form')
 			this._cl_options = [];
 			this._cl_minValidIndex = 0;
 			
-			this.height('auto');
+			this.height('auto').relX(true);
+			this.labelView().width('auto');
 			this.inputView().width('100%').height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			
 			//if options were passed in a5.Create, add them now.
@@ -423,16 +424,19 @@ a5.Package('a5.cl.ui.form')
 			return null;
 		}
 		
-		proto.Override.value = function(){
-			var selectedOpt = this.selectedOption();
-			if(!a5.cl.core.Utils.isArray(selectedOpt))
-				return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null ;
-			var data = [],
-				x, y;
-			for(x = 0, y = selectedOpt.length; x < y; x++){
-				data.push(selectedOpt[x].value || selectedOpt[x].label);
+		proto.Override.value = function(value){
+			if (value === undefined) {
+				var selectedOpt = this.selectedOption();
+				if (!a5.cl.core.Utils.isArray(selectedOpt)) 
+					return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null;
+				var data = [], x, y;
+				for (x = 0, y = selectedOpt.length; x < y; x++) {
+					data.push(selectedOpt[x].value || selectedOpt[x].label);
+				}
+				return data;
+			} else {
+				this.selectedOption({value:value});
 			}
-			return data;
 		}
 		
 		proto.Override._cl_validateRequired = function(){
