@@ -34,10 +34,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.UIInputField = function(text){
 			proto.superclass(this);
-			this.multiline(false, true); //creates the input element
-			
-			this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
-			
+			this.multiline(false, true); //creates the input element			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			this.height('auto').relX(true);
 			if(typeof text === 'string') this.value(text);
@@ -59,8 +56,15 @@ a5.Package('a5.cl.ui.form')
 			}
 		}
 		
+		proto.useHistory = function(value){
+			if(value === true && !this._cl_dataStore)
+				this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
+			else
+				this._cl_dataStore = null;
+		}
+		
 		proto.Override.id = function(value){
-			if (typeof value === 'string')
+			if (typeof value === 'string' && this._cl_dataStore)
 				this._cl_dataStore.keyPrefix(value);
 			return proto.superclass().id.call(this, value);
 		}
@@ -202,13 +206,15 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto.getHistory = function(filtered){
-			if(this._cl_history === null)
-				this._cl_history = this._cl_dataStore.getValue('history') || [];
-			return filtered === true ? this._cl_filterHistory() : this._cl_history;
+			if (this._cl_dataStore) {
+				if (this._cl_history === null) 
+					this._cl_history = this._cl_dataStore.getValue('history') || [];
+				return filtered === true ? this._cl_filterHistory() : this._cl_history;
+			}
 		}
 		
 		proto.clearHistory = function(){
-			return this._cl_dataStore.clearValue('history');
+			return this._cl_dataStore ? this._cl_dataStore.clearValue('history') :  null;
 		}
 		
 		proto.imitateLabel = function(value){
@@ -398,7 +404,8 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto._cl_persistHistory = function(){
-			this._cl_dataStore.storeValue('history', this._cl_history);
+			if(this._cl_dataStore)
+				this._cl_dataStore.storeValue('history', this._cl_history);
 		}
 		
 		proto.dealloc = function(){
@@ -407,7 +414,8 @@ a5.Package('a5.cl.ui.form')
 				this._cl_persistHistory();
 			this._cl_destroyElement(this._cl_element);
 			this._cl_element = null;
-			this._cl_dataStore.destroy();
+			if(this._cl_dataStore)
+				this._cl_dataStore.destroy();
 		}
 	});
 	
