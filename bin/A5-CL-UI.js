@@ -1046,8 +1046,7 @@ a5.Package('a5.cl.ui')
 		proto.UIControl = function(){
 			proto.superclass(this);
 			this.usePointer(false)
-			//TODO:!
-			//this.width('auto').height('auto');
+			this.width('auto').height('auto');
 		}
 		
 });
@@ -1066,8 +1065,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIHTMLControl = function(){
 			proto.superclass(this);
-			this.usePointer(false)
-				.clickHandlingEnabled(false);
+			this.usePointer(false).width('auto').height('auto').clickHandlingEnabled(false);
 		}
 		
 });
@@ -1215,7 +1213,14 @@ a5.Package('a5.cl.ui')
 				};
 			this._cl_imgLoaded = false;
 			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
-			if (!this._cl_isBG) {
+			if(!this._cl_src){
+				this._cl_imgElement.src = "";
+				self._cl_nativeWidth = 0;
+				self._cl_nativeHeight = 0;
+				self._cl_updateImgSize();
+				self.drawHTML(self._cl_imgElement);
+				self.redraw();
+			}else if (!this._cl_isBG) {
 				this._cl_imgElement.style.visibility = 'hidden';
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
@@ -1223,13 +1228,6 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
-			}
-			if(!this._cl_src){
-				self._cl_nativeWidth = 0 || self._cl_imgElement.width;
-				self._cl_nativeHeight = 0 || self._cl_imgElement.height;
-				self._cl_updateImgSize();
-				self.drawHTML(self._cl_imgElement);
-				self.redraw();
 			}
 		}
 		
@@ -1778,7 +1776,7 @@ a5.Package('a5.cl.ui')
 		
 		
 		proto.UIResizable = function(coordinates){
-			this._cl_contentView = this.create(a5.cl.ui.UIControl);
+			this._cl_contentView = this.create(a5.cl.ui.UIControl).width('100%').height('100%');
 			this._cl_handles = {};
 			if(typeof coordinates == 'string'){
 				this._cl_coordinates = [];
@@ -2348,6 +2346,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIAccordionPanel = function(){
 			proto.superclass(this);
+			this.width('100%');
 			this.initHandle();
 		}
 		
@@ -3259,7 +3258,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.UIFormElement = function(){
 			proto.superclass(this);
-			
+			this.width('100%');
 			this.addSubView(this._cl_inputView);
 			this.addEventListener(im.UIEvent.CHANGE, this._cl_eChangeEventHandler, false, this);
 		}
@@ -3335,9 +3334,11 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.validate = function(){
 			this._cl_validationStates = [];
-			var isValid = this._cl_validate();
-			if(this.required() && !this._cl_validateRequired())
-				isValid = false;
+			var isValid = true;
+			if(this.required())
+				isValid = this._cl_validateRequired();
+			if(isValid && (this.required() || !this.required() && this.value()))
+				isValid = this._cl_validate();
 			this.validityChanged(isValid);
 			return isValid;
 		}
@@ -4138,6 +4139,7 @@ a5.Package('a5.cl.ui.form')
 			sel.id = this.instanceUID() + '_select';
 			sel.style.width = '100%';
 			sel.style.border = 'none';
+			sel.disabled = !this._cl_enabled ? 'disabled' : null;
 			sel.style.backgroundColor = 'transparent';
 			sel.multiple = this._cl_selectMultiple;
 			this._cl_addFocusEvents(sel);
@@ -4603,7 +4605,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.Override.enabled = function(value){
 			if (typeof value === 'boolean') {
-				if(this._cl_select) this._cl_select.disabled = value;
+				if(this._cl_select) this._cl_select.disabled = !value;
 				this._cl_enabled = value;
 			}
 			return this._cl_enabled;
@@ -4688,8 +4690,6 @@ a5.Package('a5.cl.ui.form')
 			this._cl_element.type = 'file';
 			this._cl_element.id = this.instanceUID() + '_field';
 			this._cl_element.style.width = '100%';
-			
-			this.width('100%').height('auto');
 		}
 		
 		proto.Override.viewReady = function(){
@@ -5180,8 +5180,8 @@ a5.Package('a5.cl.ui.modals')
 		proto.UILightBox = function(){
 			proto.superclass(this);
 			
-			this._cl_bgView = this.create(im.UIControl)
-				.clickEnabled(true).backgroundColor('#000').alpha(.5);
+			this._cl_bgView = this.create(im.UIControl).width('100%').height('100%')
+				.clickEnabled(true).usePointer(true).backgroundColor('#000').alpha(.5);
 			this._cl_contentView = this.create(im.CLViewContainer)
 				.height('auto').width('auto').alignX('center').alignY('middle').backgroundColor('#fff');
 		}
@@ -5659,15 +5659,15 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto._cl_eContinueButtonHandler = function(e){
-			this.close();
 			if(typeof this._cl_onContinue === 'function')
 				this._cl_onContinue.call(this._cl_callbackScope);
+			this.close();
 		}
 		
 		proto._cl_eCancelButtonHandler = function(e){
-			this.close();
 			if(typeof this._cl_onCancel === 'function')
 				this._cl_onCancel.call(this._cl_callbackScope);
+			this.close();
 		}
 });
 
