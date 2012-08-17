@@ -132,10 +132,11 @@ a5.Package('a5.cl.ui.form')
 					switch (e.type()) {
 						case im.CLEvent.ADDED_TO_PARENT:
 							view._cl_form = this;
+							view.addOneTimeEventListener(a5.Event.DESTROYED, this._cl_eChildViewHandler, false, this);
 							this._cl_elements.push(view);
 							break;
+						case a5.Event.DESTROYED:
 						case im.CLEvent.REMOVED_FROM_PARENT:
-							console.log(view.instanceUID())
 							index = im.Utils.arrayIndexOf(this._cl_elements, view);
 							if (index > -1) {
 								this._cl_elements.splice(index, 1);

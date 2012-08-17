@@ -7,6 +7,7 @@ a5.Package('a5.cl.ui.form')
 		proto.UIOptionButton = function(type){
 			proto.superclass(this);
 			this._cl_value = null;
+			this._cl_defaultValue = null;
 			this._cl_input = this._cl_createInput((type === 'radio') ? 'radio' : 'checkbox');
 			this.height('auto')
 				.inputViewWidth(25)
@@ -17,6 +18,7 @@ a5.Package('a5.cl.ui.form')
 		proto.Override.viewReady = function(){
 			proto.superclass().viewReady.apply(this, arguments);
 			this._cl_inputView.htmlWrapper().appendChild(this._cl_input);
+			this._cl_defaultValue = this.selected();
 		}
 		
 		proto.type = function(value){
@@ -28,6 +30,7 @@ a5.Package('a5.cl.ui.form')
 				}
 				this._cl_input = this._cl_createInput(value);
 				this._cl_inputView.htmlWrapper().appendChild(this._cl_input);
+				return this;
 			}
 			return this._cl_input.type;
 		}
@@ -56,7 +59,7 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto.Override.reset = function(){
-			this.selected(false);
+			this.selected(this._cl_defaultValue === true ? true:false);
 			this.validityChanged(true);
 		}
 		
