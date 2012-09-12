@@ -533,7 +533,7 @@ a5.Package('a5.cl.ui.form')
 		 * @param {Number} value The maximum number of options to display at one time.
 		 */
 		proto.size = function(value){
-			if(typeof value === 'boolean'){
+			if(typeof value === 'number'){
 				if(this._cl_select) this._cl_select.size = value;
 				this._cl_selectSize = value;
 			}
