@@ -13,6 +13,7 @@ a5.Package('a5.cl.ui')
 			proto.superclass().viewReady.apply(this, arguments);
 			
 			this.addEventListener(im.UIMouseEvent.MOUSE_OVER, this.onRollOver, false, this);
+			this.addEventListener(im.UIMouseEvent.CLICK, this.onRollOut, false, this);
 			this.addEventListener(im.UIMouseEvent.MOUSE_OUT, this.onRollOut, false, this);
 			
 			var self = this;
