@@ -22,6 +22,7 @@ a5.Package('a5.cl.ui')
 			this._cl_expandedPanels = [];
 			this._cl_expandDuration = 0;
 			this._cl_collapseDuration = 0;
+			this.width('100%');
 			
 			var self = this;
 			this.addEventListener(a5.cl.ui.events.UIEvent.SELECT, function(e){

@@ -34,7 +34,7 @@ a5.Package('a5.cl.ui.modals')
 		
 		proto.UIAlert = function(){
 			proto.superclass(this);
-			
+			this._cl_windowLevel = a5.cl.CLWindowLevel.ALERT;
 			this.userCanClose(false)
 				.border(1, 'solid', '#666', 5)
 				.alpha(.25)

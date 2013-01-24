@@ -315,7 +315,7 @@ a5.Package('a5.cl.ui.core')
 		}
 		
 		self.loadTheme = function(url){
-			self.cl().include(a5.cl.core.Utils.makeAbsolutePath(url), eThemeLoaded);
+			self.cl().initializer().load(a5.cl.core.Utils.makeAbsolutePath(url), eThemeLoaded);
 		}
 		
 		var eThemeLoaded = function(data){
@@ -340,9 +340,9 @@ a5.Package('a5.cl.ui.core')
 			var styles = parser.buildStyles(obj.constructor, {
 				variant: variant,
 				state: state,
-				environment: this.cl().clientEnvironment(),
-				platform: this.cl().clientPlatform(),
-				orientation: this.cl().clientOrientation()
+				environment: this.DOM().clientEnvironment(),
+				platform: this.DOM().clientPlatform(),
+				orientation: this.DOM().clientOrientation()
 			}), prop;
 			for(prop in styles){
 				var spl = prop.split('_'),
@@ -618,7 +618,6 @@ a5.Package('a5.cl.ui.mixins')
 		})
 		
 		proto.UIGroupable = function(){
-			im.rebuild();
 		}
 		
 		proto.selected = function(value, suppressEvent){
@@ -914,7 +913,7 @@ a5.Package('a5.cl.ui.mixins')
 
 a5.Package('a5.cl.ui.mixins')
 	.Import('a5.cl.ui.events.UIKeyboardEvent',
-			'a5.cl.core.Utils')
+			'a5.cl.initializers.dom.Utils')
 	.Mixin('UIKeyboardEventDispatcher', function(proto, im){
 		
 		proto.MustExtend('a5.EventDispatcher');
@@ -1077,7 +1076,7 @@ a5.Package('a5.cl.ui')
 	.Prototype('UIController', function(proto, im){
 		
 		proto.UIController = function(defaultView){
-			proto.superclass(this, [defaultView || this.create(a5.cl.ui.UIControl)]);
+			proto.superclass(this, [defaultView || this.create(a5.cl.CLWindow)]);
 		}
 });
 
@@ -1631,6 +1630,7 @@ a5.Package('a5.cl.ui')
 			proto.superclass().viewReady.apply(this, arguments);
 			
 			this.addEventListener(im.UIMouseEvent.MOUSE_OVER, this.onRollOver, false, this);
+			this.addEventListener(im.UIMouseEvent.CLICK, this.onRollOut, false, this);
 			this.addEventListener(im.UIMouseEvent.MOUSE_OUT, this.onRollOut, false, this);
 			
 			var self = this;
@@ -2056,6 +2056,7 @@ a5.Package('a5.cl.ui')
 			this._cl_expandedPanels = [];
 			this._cl_expandDuration = 0;
 			this._cl_collapseDuration = 0;
+			this.width('100%');
 			
 			var self = this;
 			this.addEventListener(a5.cl.ui.events.UIEvent.SELECT, function(e){
@@ -2493,6 +2494,7 @@ a5.Package('a5.cl.ui')
 			proto.superclass(this);
 			this.relX(true);
 			this.constrainChildren(false);
+			this.width('100%');
 		}
 		
 		proto.Override.constrainChildren = function(){}
@@ -3004,6 +3006,7 @@ a5.Package('a5.cl.ui.controllers')
 					builder.build(function(view){
 						this.addTabAtIndex(view, targetIndex, node.label);
 						this._cl_pendingTabs--;
+						this._cl_viewReady();
 					}, null, this);
 				}
 			} else
@@ -3248,6 +3251,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_validation = null;
 			this._cl_validateOnChange = false;
 			this._cl_validateOnBlur = false;
+			this._cl_includeInParentForm = true;
 			this._cl_value = null;
 			this._cl_form = null;
 			this._cl_changeEvent = this.create(im.UIEvent, [im.UIEvent.CHANGE]).shouldRetain(true);
@@ -3274,6 +3278,14 @@ a5.Package('a5.cl.ui.form')
 				return this;
 			}
 			return this._cl_name || this.id().replace(/[^a-z0-9_]/gi, '');
+		}
+		
+		proto.includeInParentForm = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_includeInParentForm = value;
+				return this;
+			}
+			return this._cl_includeInParentForm;
 		}
 		
 		proto.value = function(value){
@@ -3378,10 +3390,10 @@ a5.Package('a5.cl.ui.form')
 		
 		proto._cl_addFocusEvents = function(elem){
 			var self = this;
-			im.Utils.addEventListener(elem, 'focus', function(e){
+			a5.cl.initializers.dom.Utils.addEventListener(elem, 'focus', function(e){
 				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.FOCUS, e]));
 			});
-			im.Utils.addEventListener(elem, 'blur', function(e){
+			a5.cl.initializers.dom.Utils.addEventListener(elem, 'blur', function(e){
 				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.BLUR, e]));
 				if(self._cl_validateOnBlur)
 					self.validate();
@@ -3607,10 +3619,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.UIInputField = function(text){
 			proto.superclass(this);
-			this.multiline(false, true); //creates the input element
-			
-			this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
-			
+			this.multiline(false, true); //creates the input element			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			this.height('auto').relX(true);
 			if(typeof text === 'string') this.value(text);
@@ -3632,8 +3641,15 @@ a5.Package('a5.cl.ui.form')
 			}
 		}
 		
+		proto.useHistory = function(value){
+			if(value === true && !this._cl_dataStore)
+				this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
+			else
+				this._cl_dataStore = null;
+		}
+		
 		proto.Override.id = function(value){
-			if (typeof value === 'string')
+			if (typeof value === 'string' && this._cl_dataStore)
 				this._cl_dataStore.keyPrefix(value);
 			return proto.superclass().id.call(this, value);
 		}
@@ -3745,7 +3761,7 @@ a5.Package('a5.cl.ui.form')
 		proto.Override.enabled = function(value){
 			if(typeof value === 'boolean'){
 				this._cl_enabled = value;
-				this._cl_element.readOnly = !value;
+				this._cl_element.disabled = !value;
 				return this;
 			}
 			return this._cl_enabled;
@@ -3775,13 +3791,15 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto.getHistory = function(filtered){
-			if(this._cl_history === null)
-				this._cl_history = this._cl_dataStore.getValue('history') || [];
-			return filtered === true ? this._cl_filterHistory() : this._cl_history;
+			if (this._cl_dataStore) {
+				if (this._cl_history === null) 
+					this._cl_history = this._cl_dataStore.getValue('history') || [];
+				return filtered === true ? this._cl_filterHistory() : this._cl_history;
+			}
 		}
 		
 		proto.clearHistory = function(){
-			return this._cl_dataStore.clearValue('history');
+			return this._cl_dataStore ? this._cl_dataStore.clearValue('history') :  null;
 		}
 		
 		proto.imitateLabel = function(value){
@@ -3971,7 +3989,8 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto._cl_persistHistory = function(){
-			this._cl_dataStore.storeValue('history', this._cl_history);
+			if(this._cl_dataStore)
+				this._cl_dataStore.storeValue('history', this._cl_history);
 		}
 		
 		proto.dealloc = function(){
@@ -3980,7 +3999,8 @@ a5.Package('a5.cl.ui.form')
 				this._cl_persistHistory();
 			this._cl_destroyElement(this._cl_element);
 			this._cl_element = null;
-			this._cl_dataStore.destroy();
+			if(this._cl_dataStore)
+				this._cl_dataStore.destroy();
 		}
 	});
 	
@@ -3997,6 +4017,7 @@ a5.Package('a5.cl.ui.form')
 		proto.UIOptionButton = function(type){
 			proto.superclass(this);
 			this._cl_value = null;
+			this._cl_defaultValue = null;
 			this._cl_input = this._cl_createInput((type === 'radio') ? 'radio' : 'checkbox');
 			this.height('auto')
 				.inputViewWidth(25)
@@ -4007,6 +4028,7 @@ a5.Package('a5.cl.ui.form')
 		proto.Override.viewReady = function(){
 			proto.superclass().viewReady.apply(this, arguments);
 			this._cl_inputView.htmlWrapper().appendChild(this._cl_input);
+			this._cl_defaultValue = this.selected();
 		}
 		
 		proto.type = function(value){
@@ -4018,6 +4040,7 @@ a5.Package('a5.cl.ui.form')
 				}
 				this._cl_input = this._cl_createInput(value);
 				this._cl_inputView.htmlWrapper().appendChild(this._cl_input);
+				return this;
 			}
 			return this._cl_input.type;
 		}
@@ -4046,8 +4069,14 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto.Override.reset = function(){
-			this.selected(false);
+			this.selected(this._cl_defaultValue === true ? true:false);
 			this.validityChanged(true);
+		}
+		
+		proto.Override.enabled = function(value){
+			if(typeof value == 'boolean' && this._cl_input)
+				this._cl_input.disabled = !value;
+			return this.superclass().enabled.apply(this, arguments);
 		}
 		
 		proto.Override._cl_validateRequired = function(){
@@ -4065,6 +4094,7 @@ a5.Package('a5.cl.ui.form')
 			input.type = type;
 			input.name = this.instanceUID();
 			input.checked = checked === true;
+			input.disabled = !this._cl_enabled;
 			var self = this;
 			input.onchange = function(){
 				self.selected(this.checked);
@@ -4112,7 +4142,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_minValidIndex = 0;
 			
 			this.height('auto');
-			this.inputView().width(200).height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
+			this.inputView().width(200).height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff')
 			
 			//if options were passed in a5.Create, add them now.
 			if(options instanceof Array)
@@ -4165,6 +4195,7 @@ a5.Package('a5.cl.ui.form')
 					opt = document.createElement('option');
 					opt.innerHTML = item.label;
 					opt.value = item.value + '';
+					opt.title = item.title + '';
 				}
 				//add the item to the select
 				sel.appendChild(opt);
@@ -4215,13 +4246,13 @@ a5.Package('a5.cl.ui.form')
 		
 		/** @private */
 		proto._cl_addOptionsFromData = function(options){
-			if(options instanceof Array){
+			if(a5.cl.core.Utils.isArray(options)){
 				for(var x = 0, y = options.length; x < y; x++){
 					var opt = options[x];
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value);
+						this.addOption(opt.label, opt.value, null, opt.title);
 				}
 			}
 		}
@@ -4232,10 +4263,11 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} label	The text to be displayed by the option.
 		 * @param {Object} value	The value of the option.  Can be any type.
 		 * @param {String} [group]	The label of the group that this option should be added to.
+		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group){
+		proto.addOption = function(label, value, group, title){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, -1, group);
+			this._cl_addOptionAtIndex(label, value, -1, group, title);
 			//redraw the select
 			this._cl_redrawSelect();
 		}
@@ -4247,16 +4279,17 @@ a5.Package('a5.cl.ui.form')
 		 * @param {Object} value	The value of the option.  Can be any type.
 		 * @param {Number} index	The index at which this option should be inserted (relative to the group, if one is specified).
 		 * @param {String} [group]	The label of the group that this option should be added to.
+		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOptionAtIndex = function(label, value, index, group){
+		proto.addOptionAtIndex = function(label, value, index, group, title){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, index, group);
+			this._cl_addOptionAtIndex(label, value, index, group, title);
 			//redraw the select
 			this._cl_redrawSelect();
 		}
 		
 		/** @private */
-		proto._cl_addOptionAtIndex = function(label, value, index, group){
+		proto._cl_addOptionAtIndex = function(label, value, index, group, title){
 			if(typeof group === 'string' && typeof index === 'number'){
 				//if a group was specified, add the option to that group
 				var grp = this._cl_findGroup(group);
@@ -4273,7 +4306,7 @@ a5.Package('a5.cl.ui.form')
 				//validate the index
 				if(index < 0 || index > this._cl_options.length) index = this._cl_options.length;
 				//add it to the array at the specified index
-				this._cl_options.splice(index, 0, {label:label, value:value});
+				this._cl_options.splice(index, 0, {label:label, value:value, title:title});
 			}
 		}
 		
@@ -4443,55 +4476,88 @@ a5.Package('a5.cl.ui.form')
 		/**
 		 * Gets or sets the option that is currently selected, or null if none is selected.
 		 * 
-		 * @param value {Object} An object with 'value' and/or 'label' properties corresponding to the option that should be selected.
+		 * @param value {Number|Object} the index of the selection or an object with 'value' and/or 'label' properties corresponding to the option that should be selected.
 		 * @return {Object}	The currently selected option.
 		 */
 		proto.selectedOption = function(value){
-			var setting = (typeof value === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label')));
-			var checkLabel = setting && value.hasOwnProperty('label');
-			var checkValue = setting && value.hasOwnProperty('value');
+			var type = typeof value,
+				setting = type == 'number' || (type === 'object' && (value.hasOwnProperty('value') || value.hasOwnProperty('label'))),
+				checkLabel = setting && type === 'object' && value.hasOwnProperty('label'),
+				checkValue = setting && type === 'object' && value.hasOwnProperty('value'),
+				checkIndex = setting && type === 'number',
+				selectedIndex = this._cl_select.selectedIndex,
+				i = -1,
+				selectedOptions = [],
+				x, xl, y, yl, item, grpItem, labelMatch, valueMatch;
 				
-			var selectedIndex = this._cl_select.selectedIndex;
 			if(selectedIndex < 0 && !setting) return null;
 			
-			var i = -1;
-			for (var x = 0, xl = this._cl_options.length; x < xl; x++) {
-				var item = this._cl_options[x];
+			if(checkIndex && value < 0){
+				this._cl_select.selectedIndex = -1;
+				return null;
+			}
+			
+			if(this._cl_selectMultiple){
+				selectedIndex = [];
+				for(x = 0, y = this._cl_select.options.length; x < y; x++){
+					if(this._cl_select.options[x].selected)
+						selectedIndex.push(x);
+				}
+			}
+			
+			for (x = 0, xl = this._cl_options.length; x < xl; x++) {
+				item = this._cl_options[x];
 				if (item.isGroup) {
-					for (var y = 0, yl = item.options.length; y < yl; y++) {
+					for (y = 0, yl = item.options.length; y < yl; y++) {
 						i++;
-						var grpItem = item.options[y];
+						grpItem = item.options[y];
 						if (setting) {
-							var labelMatch = checkLabel ? (grpItem.label === value.label) : true;
-							var valueMatch = checkValue ? (grpItem.value === value.value) : true;
-							if(labelMatch && valueMatch){
+							labelMatch = checkLabel ? (grpItem.label === value.label) : true;
+							valueMatch = checkValue ? (grpItem.value === value.value) : true;
+							if (checkIndex ? (i === value) : (labelMatch && valueMatch)) {
 								this._cl_select.selectedIndex = i;
 								return this;
 							}
 						} else if (i === selectedIndex) {
 							return grpItem;
+						} else if (a5.cl.core.Utils.arrayContains(selectedIndex, i)) {
+							selectedOptions.push(grpItem);
 						}
 					}
 				} else {
 					i++
 					if (setting) {
-						var labelMatch = checkLabel ? (item.label === value.label) : true;
-						var valueMatch = checkValue ? (item.value === value.value) : true;
-						if(labelMatch && valueMatch){
+						labelMatch = checkLabel ? (item.label === value.label) : true;
+						valueMatch = checkValue ? (item.value === value.value) : true;
+						if(checkIndex ? (i === value) : (labelMatch && valueMatch)){
 							this._cl_select.selectedIndex = i;
 							return this;
 						}
 					} else if (i === selectedIndex) {
 						return item;
+					} else if(a5.cl.core.Utils.arrayContains(selectedIndex, i)){
+						selectedOptions.push(item);
 					}
 				}
 			}
+			if(this._cl_selectMultiple)
+				return selectedOptions
 			return null;
 		}
 		
-		proto.Override.value = function(){
-			var selectedOpt = this.selectedOption();
-			return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null ;
+		proto.Override.value = function(value){
+			if (value === undefined) {
+				var selectedOpt = this.selectedOption();
+				if (!a5.cl.core.Utils.isArray(selectedOpt)) 
+					return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null;
+				var data = [], x, y;
+				for (x = 0, y = selectedOpt.length; x < y; x++) {
+					data.push(selectedOpt[x].value || selectedOpt[x].label);
+				}
+				return data;
+			} else {
+				this.selectedOption({value:value});
+			}
 		}
 		
 		proto.Override._cl_validateRequired = function(){
@@ -4580,7 +4646,7 @@ a5.Package('a5.cl.ui.form')
 				if(this._cl_select) this._cl_select.multiple = value;
 				this._cl_selectMultiple = value;
 			}
-			return this._cl_select.multiple;
+			return this._cl_selectMultiple;
 		}
 		
 		/**
@@ -4588,7 +4654,7 @@ a5.Package('a5.cl.ui.form')
 		 * @param {Number} value The maximum number of options to display at one time.
 		 */
 		proto.size = function(value){
-			if(typeof value === 'boolean'){
+			if(typeof value === 'number'){
 				if(this._cl_select) this._cl_select.size = value;
 				this._cl_selectSize = value;
 			}
@@ -4619,7 +4685,7 @@ a5.Package('a5.cl.ui.form')
 			proto.superclass().processCustomViewDefNode.apply(this, arguments);
 			switch(nodeName){
 				case 'Option':
-					this.addOption(node.label, node.value, node.group);
+					this.addOption(node.label, node.value, node.group, node.title);
 					break;
 				case 'Group':
 					this.addGroup(node.label);
@@ -4692,15 +4758,215 @@ a5.Package('a5.cl.ui.form')
 			this._cl_element.style.width = '100%';
 		}
 		
-		proto.Override.viewReady = function(){
+		proto.Override.reset = function(){
+			proto.superclass().reset.apply(this, arguments);
+			this._cl_inputView.drawHTML(" ");
+			this._cl_destroyElement(this._cl_element);
+			this._cl_element = document.createElement('input');
+			this._cl_element.type = 'file';
+			this._cl_element.id = this.instanceUID() + '_field';
+			this._cl_element.style.width = '100%';
 			this._cl_inputView.appendChild(this._cl_element);
 		}
 		
-		proto.Override.value = function(){
-			return this._cl_element.files ? this._cl_element.files[0] : this._cl_element.value;
+		proto.Override.viewReady = function(){
+			proto.superclass().viewReady.apply(this, arguments);
+			this._cl_inputView.appendChild(this._cl_element);
+		}
+		
+		proto.Override.value = function(value){
+			if(value === undefined)
+				return this._cl_element.files ? this._cl_element.files[0] : this._cl_element.value;
 		}
 });
 
+
+a5.Package('a5.cl.ui.form')
+	
+	.Import('a5.cl.ui.form.*',
+			'a5.cl.ui.events.*',
+			'a5.cl.ui.buttons.UIButton',
+			'a5.PropertyMutatorAttribute')
+	.Extends('a5.cl.ui.form.UIFormElement')
+	.Static(function(UIDateSelect){
+		
+		UIDateSelect.ALLOW_ALL = 'uiDateSelectAllowAll';
+		
+		UIDateSelect.FUTURE = 'uiDateSelectAllowFuture';
+		
+		UIDateSelect.PAST = 'uiDateSelectAllowPast';
+		
+	})
+	.Prototype('UIDateSelect', function(cls, im, UIDateSelect){
+		
+		this.Properties(function(){
+			this._cl_daySelect = null;
+			this._cl_monthSelect = null;
+			this._cl_yearSelect = null;
+			this._cl_hourSelect = null;
+			this._cl_minuteSelect = null;
+			this._cl_showTime = false;
+			this._cl_minYear = 1970;
+			this._cl_maxYear = 2050;
+			this._cl_allowDates = UIDateSelect.ALLOW_ALL;
+			this._cl_showSelectNow = false;
+			this._cl_showClear = false;
+			this._cl_dateValue = null;
+			this._cl_ready = false;
+		})
+		
+		cls.UIDateSelect = function(){
+			cls.superclass(this);
+			this._cl_element = this.create(im.UIInputField).width(380).enabled(false);
+			this._cl_element.includeInParentForm(false);
+			this._cl_element.element().style.fontSize = '10px';
+			this._cl_element.element().style.textAlign = 'center';
+		}	
+		
+		cls.Override.viewReady = function(){
+			cls.superclass().viewReady.apply(this, arguments);
+			this.relY(true).height('auto');
+			this.inputView().width(0);
+			var wrapper = this.create(a5.cl.CLViewContainer);
+			wrapper.relX(true).height('auto').border(1).width(380).padding(2);
+			this.addSubView(this._cl_element);
+			this._cl_monthSelect = this.create(im.UISelect).label('Month').width(100).relY(true).includeInParentForm(false);
+			this._cl_monthSelect.inputView().width(100);
+			this._cl_monthSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
+			this._cl_daySelect = this.create(im.UISelect).label('Day').width(50).relY(true).x(5).includeInParentForm(false);
+			this._cl_daySelect.inputView().width(50);
+			this._cl_daySelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
+			this._cl_yearSelect = this.create(im.UISelect).label('Year').width(100).relY(true).x(5).includeInParentForm(false);
+			this._cl_yearSelect.inputView().width(100);
+			this._cl_yearSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
+			wrapper.addSubView(this._cl_monthSelect);
+			wrapper.addSubView(this._cl_daySelect);
+			wrapper.addSubView(this._cl_yearSelect);
+			if(this.showTime()){
+				this._cl_hourSelect = this.create(im.UISelect).label('Hour').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_hourSelect.inputView().width(50);
+				this._cl_hourSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
+				this._cl_minuteSelect = this.create(im.UISelect).label('Minute').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_minuteSelect.inputView().width(50);
+				this._cl_minuteSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
+				wrapper.addSubView(this._cl_hourSelect);
+				wrapper.addSubView(this._cl_minuteSelect);
+			}
+			this.addSubView(wrapper);
+			var btnWrapper = this.create(a5.cl.CLViewContainer);
+			btnWrapper.relX(true).height('auto')
+			if(this.showClear()){
+				var clearBtn = this.create(im.UIButton).label('Clear Date');
+				clearBtn.height(20).width('auto').labelView().fontSize(10);
+				clearBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_clearValues, false, this);
+				btnWrapper.addSubView(clearBtn);
+			}
+			if(this.showSelectNow()){
+				var showNowBtn = this.create(im.UIButton).label('Set To Now');
+				showNowBtn.height(20).width('auto').labelView().fontSize(10);
+				showNowBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_setToNow, false, this);
+				btnWrapper.addSubView(showNowBtn);
+			}
+			this.addSubView(btnWrapper);
+			this._cl_populateValues();
+			this._cl_ready = true;
+			if(this._cl_dateValue)
+				this._cl_applyValue();
+		}
+		
+		cls.showTime = this.Attributes(['PropertyMutator', {property:'_cl_showTime'}]);		
+		cls.minYear = this.Attributes(['PropertyMutator', {property:'_cl_minYear'}]);
+		cls.maxYear = this.Attributes(['PropertyMutator', {property:'_cl_maxYear'}]);
+		cls.showClear = this.Attributes(['PropertyMutator', {property:'_cl_showClear'}]);
+		cls.showSelectNow = this.Attributes(['PropertyMutator', {property:'_cl_showSelectNow'}]);
+		cls.allowDates = this.Attributes(['PropertyMutator', {property:'_cl_allowDates'}]);
+		
+		cls.Override.value = function(val){
+			if(val !== undefined){
+				this._cl_dateValue = new Date(val);
+				if(this._cl_ready)
+					this._cl_applyValue();
+				return this;
+			}
+			return this._cl_dateValue;
+		}
+		
+		cls._cl_clearValues = function(){
+			this._cl_daySelect.selectedOption(-1);
+			this._cl_monthSelect.selectedOption(-1);
+			this._cl_yearSelect.selectedOption(-1);
+			if (this.showTime()) {
+				this._cl_hourSelect.selectedOption(-1);
+				this._cl_minuteSelect.selectedOption(-1);
+			}
+			this._cl_dateValue = null;
+			this._cl_updateSelectedDisplay();
+		}
+		
+		cls._cl_setToNow = function(){
+			this.value(new Date());
+		}
+		
+		cls._cl_populateValues = function(){
+			for(var i = 1, l= 32; i<l; i++)
+				this._cl_daySelect.addOption(i, i);
+			var monthArr = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+			for(i = 0, l = monthArr.length; i<l; i++)
+				this._cl_monthSelect.addOption(monthArr[i], i);
+			for(i = this._cl_minYear, l = this.maxYear()+1; i<l; i++)
+				this._cl_yearSelect.addOption(i, i);
+			if(this.showTime()){
+				for(i = 0, l = 25; i<l; i++)
+					this._cl_hourSelect.addOption(i, i);
+				for(i = 0, l = 61; i<l; i++)
+					this._cl_minuteSelect.addOption(i, i);
+			}
+				
+		}
+		
+		cls._cl_selectionChangeHandler = function(e){
+			this._cl_updateValue();
+		}
+		
+		cls._cl_updateValue = function(){
+			var dt = new Date(),
+				now = new Date();
+			dt.setFullYear(this._cl_yearSelect.selectedOption() ? this._cl_yearSelect.selectedOption().value : this.minYear());			
+			dt.setMonth(this._cl_monthSelect.selectedOption() ? this._cl_monthSelect.selectedOption().value : 0);	
+			dt.setDate(this._cl_daySelect.selectedOption() ? this._cl_daySelect.selectedOption().value : 1);
+			if(this.showTime()){
+				dt.setHours(this._cl_hourSelect.selectedOption() ? this._cl_hourSelect.selectedOption().value : 0);			
+				dt.setMinutes(this._cl_minuteSelect.selectedOption() ? this._cl_minuteSelect.selectedOption().value : 0);	
+				dt.setSeconds(0);
+			}
+			if((this._cl_allowDates == UIDateSelect.FUTURE && dt < now) || this._cl_allowDates == UIDateSelect.PAST && dt > now)
+				dt = now;
+					
+			this._cl_dateValue = dt;
+			this._cl_applyValue();
+		}
+		
+		cls._cl_updateSelectedDisplay = function(){
+			if(this._cl_dateValue)
+				this._cl_element.value(this._cl_dateValue.toLocaleFormat());
+			else
+				this._cl_element.value("");
+		}
+		
+		cls._cl_applyValue = function(){
+			if(this._cl_dateValue){
+				var dt = this._cl_dateValue;
+				this._cl_updateSelectedDisplay();
+				this._cl_daySelect.selectedOption({value:dt.getDate()});
+				this._cl_monthSelect.selectedOption({value:dt.getMonth()});
+				this._cl_yearSelect.selectedOption({value:dt.getFullYear()});
+				if(this.showTime()){
+					this._cl_hourSelect.selectedOption({value:dt.getHours()});
+					this._cl_minuteSelect.selectedOption({value:dt.getMinutes()});
+				}
+			}
+		}
+})
 
 
 a5.Package('a5.cl.ui.form')
@@ -4744,9 +5010,9 @@ a5.Package('a5.cl.ui.form')
 				x, y, thisElem, optGroup;
 			for(x = 0, y = this._cl_elements.length; x < y; x++){
 				thisElem = this._cl_elements[x];
-				if(thisElem instanceof im.UIOptionButton){
+				if (thisElem instanceof im.UIOptionButton) {
 					optGroup = thisElem.optionGroup();
-					if(optGroup)
+					if (optGroup) 
 						thisElem = optGroup;
 					else {
 						data[thisElem.name()] = thisElem.selected();
@@ -4832,18 +5098,22 @@ a5.Package('a5.cl.ui.form')
 				return;
 			}
 			if(view instanceof im.UIFormElement) {
-				switch (e.type()) {
-					case im.CLEvent.ADDED_TO_PARENT:
-						view._cl_form = this;
-						this._cl_elements.push(view);
-						break;
-					case im.CLEvent.REMOVED_FROM_PARENT:
-						index = im.Utils.arrayIndexOf(this._cl_elements, view);
-						if (index > -1) {
-							this._cl_elements.splice(index, 1);
-							view._cl_form = null;
-						}
-						break;
+				if (view.includeInParentForm()) {
+					switch (e.type()) {
+						case im.CLEvent.ADDED_TO_PARENT:
+							view._cl_form = this;
+							view.addOneTimeEventListener(a5.Event.DESTROYED, this._cl_eChildViewHandler, false, this);
+							this._cl_elements.push(view);
+							break;
+						case a5.Event.DESTROYED:
+						case im.CLEvent.REMOVED_FROM_PARENT:
+							index = im.Utils.arrayIndexOf(this._cl_elements, view);
+							if (index > -1) {
+								this._cl_elements.splice(index, 1);
+								view._cl_form = null;
+							}
+							break;
+					}
 				}
 			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
@@ -4896,10 +5166,9 @@ a5.Package('a5.cl.ui.buttons')
 			this._cl_labelView = this.create(im.UITextField);
 			this._cl_data = null;
 			this._cl_state = 'up';
-			
-			this._cl_labelView.width('100%')
-				.textAlign('center')
+			this._cl_labelView.width('auto')
 				.alignY('middle')
+				.alignX('center')
 				.nonBreaking(true);
 			this.usePointer(true);
 			this.clickEnabled(true);
@@ -5043,7 +5312,6 @@ a5.Package('a5.cl.ui.buttons')
 		}	
 });
 
-
 a5.Package('a5.cl.ui.buttons')
 
 	.Extends('UIButton')
@@ -5056,21 +5324,21 @@ a5.Package('a5.cl.ui.buttons')
 		};
 		
 		
-		var Private = this.PrivateProperties(function(){
-			this.toggled = false;
+		this.Properties(function(){
+			this._cl_toggled = false;
 		})
 		
 		proto.UIToggleButton = function(toggled){
 			proto.superclass(this);
-			Private(this).toggled = toggled;
+			this._cl_toggled = toggled;
 		}
 		
 		proto.Override.childrenReady = function(){
-			this._cl_setToggle(Private(this).toggled);
+			this._cl_setToggle(this._cl_toggled);
 		}
 		
 		proto.Override._cl_onMouseClick = function(e){
-			this._cl_setToggle(!Private(this).toggled);
+			this._cl_setToggle(this._cl_toggled);
 			proto.superclass()._cl_onMouseClick.call(this, e);
 		}
 		
@@ -5079,11 +5347,11 @@ a5.Package('a5.cl.ui.buttons')
 				this._cl_setToggle(value);
 			}
 			//TODO: forced ! because events are not fired here first
-			return !Private(this).toggled;
+			return !this._cl_toggled.toggled;
 		}
 		
 		proto._cl_setToggle = function(value){
-			Private(this).toggled = value;
+			this._cl_toggled = value;
 			this.toggledView().visible(value);
 			this.untoggledView().visible(!value);
 		}
@@ -5544,7 +5812,7 @@ a5.Package('a5.cl.ui.modals')
 		
 		proto.UIAlert = function(){
 			proto.superclass(this);
-			
+			this._cl_windowLevel = a5.cl.CLWindowLevel.ALERT;
 			this.userCanClose(false)
 				.border(1, 'solid', '#666', 5)
 				.alpha(.25)
@@ -6040,8 +6308,6 @@ a5.Package('a5.cl.ui.table')
 		}
 	});
 
-
-
 /**
  * @class A view representing a single cell within a table.
  * @name a5.cl.ui.table.UITableCell
@@ -6070,7 +6336,7 @@ a5.Package('a5.cl.ui.table')
 			
 			this._cl_viewElement.style.padding = '0';
 			this._cl_contentWrapper.width('100%').height('auto');
-			this._cl_contentWrapper._cl_defaultDisplayStyle = '';
+			//this._cl_contentWrapper._cl_defaultDisplayStyle = '';
 			this._cl_viewElement.style.position = this._cl_contentWrapper._cl_viewElement.style.position = 'relative';
 			this.addSubView(this._cl_contentWrapper);
 			this._cl_childViewTarget = this._cl_contentWrapper;
@@ -6088,9 +6354,35 @@ a5.Package('a5.cl.ui.table')
 			return 0; //default cell cannot be sorted.  Override this to enable sorting.
 		}
 		
+		/*proto.Override.width = function(value, duration, ease){
+			if(value === undefined || value === null)
+				value = 'offset';
+			var tempValue;
+			switch(value){
+				case 'offset':
+					this._cl_contentWrapper._cl_viewElement.style.display = "none";
+					tempValue = this._cl_viewElement.offsetWidth;
+					this._cl_contentWrapper._cl_viewElement.style.display = "block";
+					return tempValue;
+				case 'client':
+				case 'inner':
+				case 'content':
+					this._cl_contentWrapper._cl_viewElement.style.display = "none";
+					tempValue = this._cl_viewElement.clientWidth;
+					this._cl_contentWrapper._cl_viewElement.style.display = "block";
+					return tempValue;
+				case 'value':
+					return 'auto';
+				default:
+					return proto.superclass().width.call(this, arguments);
+			}
+		}*/
+		
+		/*
 		proto.Override._cl_render = function(){
-			//proto.superclass()._cl_render.call(this);
-		}
+			proto.superclass()._cl_render.call(this);
+			//this._cl_viewElement.style.width = "auto";
+		}*/
 		
 		proto.Override.padding = function(value){
 			if (value !== undefined) {
@@ -6099,8 +6391,11 @@ a5.Package('a5.cl.ui.table')
 			}
 			return proto.superclass().padding.call(this, value);
 		}
+		
+		/*proto.Override._cl_redraw = function(force, suppressRender){
+			proto.superclass()._cl_redraw.apply(this, arguments);
+		}*/
 	});
-
 
 /**
  * @class Acts as a cell within a UITableHeader.
@@ -6285,7 +6580,7 @@ a5.Package('a5.cl.ui.table')
 		}
 		
 		proto.Override._cl_render = function(){
-			
+			proto.superclass()._cl_render.call(this);
 		}
 		
 		proto.Override.backgroundColor = function(value){
@@ -6296,7 +6591,6 @@ a5.Package('a5.cl.ui.table')
 			this._cl_sortFunction = this._cl_textField = null;
 		}
 	});
-
 
 
 /**
@@ -6319,6 +6613,8 @@ a5.Package('a5.cl.ui.table')
 		
 		proto.UITableView = function(){
 			proto.superclass(this);
+			if(this._cl_height.value == 'auto')
+                im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), null, null, this._cl_height);
 			this._cl_rows = [];
 			this._cl_cols = [];
 			this._cl_header = null;
@@ -6387,9 +6683,12 @@ a5.Package('a5.cl.ui.table')
 		}
 		
 		proto.Override._cl_redraw = function(force, suppressRender){
-			var redrawVals = proto.superclass()._cl_redraw.call(this, true, false);
-			im.CLView._cl_updateWH(this, this._cl_viewElement.offsetWidth, 'width', this.x(true), this._cl_minWidth, this._cl_maxWidth, this._cl_width);
-			im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), this._cl_minHeight, this._cl_maxHeight, this._cl_height);
+			//var redrawVals = proto.superclass()._cl_redraw.call(this, true, true);
+			//this._cl_updateColumnWidths();
+			proto.superclass()._cl_redraw.call(this, force, suppressRender);
+			
+			//im.CLView._cl_updateWH(this, this._cl_viewElement.offsetWidth, 'width', this.x(true), this._cl_minWidth, this._cl_maxWidth, this._cl_width);
+			//im.CLView._cl_updateWH(this, this._cl_viewElement.offsetHeight, 'height', this.y(true), this._cl_minHeight, this._cl_maxHeight, this._cl_height);
 			
 			/*if(redrawVals.shouldRedraw){
 				var autoHeights = false;
@@ -6702,7 +7001,6 @@ a5.Package('a5.cl.ui.table')
 	});
 
 
-
 a5.Package('a5.cl.ui.table')
 	.Extends('a5.cl.ui.UIHTMLControl')
 	.Prototype('UIHtmlTable', function(proto, im){
@@ -6874,7 +7172,7 @@ a5.Package('a5.cl.ui.table')
 		proto.UITableRow = function(){
 			proto.superclass(this);
 			this._cl_cells = [];
-			this.height('auto').relX(true);
+			this.height('auto').width('100%').relX(true);
 			this._cl_autoHeight = true;
 			
 			this._cl_viewElement.style.position = 'relative';
@@ -6983,7 +7281,6 @@ a5.Package('a5.cl.ui.table')
 		}
 	});
 
-
 /**
  * @class The header row within a UITableView.  This is like a UITableRow, but can only contain UITableHeaderCells.
  * @name a5.cl.ui.table.UITableHeader
@@ -7041,7 +7338,6 @@ a5.Package('a5.cl.ui.table')
 		})
 	});
 
-
 a5.Package('a5.cl.ui.table')
 	.Import('a5.cl.ui.*')
 	.Extends('UITableCell')
@@ -7084,7 +7380,6 @@ a5.Package('a5.cl.ui.table')
 			this._cl_textField = null;
 		}
 	});
-
 
 
 })(a5);

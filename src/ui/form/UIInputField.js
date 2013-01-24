@@ -176,7 +176,7 @@ a5.Package('a5.cl.ui.form')
 		proto.Override.enabled = function(value){
 			if(typeof value === 'boolean'){
 				this._cl_enabled = value;
-				this._cl_element.readOnly = !value;
+				this._cl_element.disabled = !value;
 				return this;
 			}
 			return this._cl_enabled;

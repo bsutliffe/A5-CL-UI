@@ -19,9 +19,8 @@ a5.Package('a5.cl.ui.form')
 			this._cl_options = [];
 			this._cl_minValidIndex = 0;
 			
-			this.height('auto').relX(true);
-			this.labelView().width('auto');
-			this.inputView().width('100%').height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
+			this.height('auto');
+			this.inputView().width(200).height('auto').border(1, 'solid', '#C8C6C4').backgroundColor('#fff')
 			
 			//if options were passed in a5.Create, add them now.
 			if(options instanceof Array)

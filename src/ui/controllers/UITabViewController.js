@@ -340,6 +340,7 @@ a5.Package('a5.cl.ui.controllers')
 					builder.build(function(view){
 						this.addTabAtIndex(view, targetIndex, node.label);
 						this._cl_pendingTabs--;
+						this._cl_viewReady();
 					}, null, this);
 				}
 			} else

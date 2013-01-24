@@ -10,7 +10,6 @@ a5.Package('a5.cl.ui.mixins')
 		})
 		
 		proto.UIGroupable = function(){
-			im.rebuild();
 		}
 		
 		proto.selected = function(value, suppressEvent){

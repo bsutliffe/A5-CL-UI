@@ -1,7 +1,7 @@
 
 a5.Package('a5.cl.ui.mixins')
 	.Import('a5.cl.ui.events.UIKeyboardEvent',
-			'a5.cl.core.Utils')
+			'a5.cl.initializers.dom.Utils')
 	.Mixin('UIKeyboardEventDispatcher', function(proto, im){
 		
 		proto.MustExtend('a5.EventDispatcher');

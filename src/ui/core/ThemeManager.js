@@ -14,7 +14,7 @@ a5.Package('a5.cl.ui.core')
 		}
 		
 		self.loadTheme = function(url){
-			self.cl().include(a5.cl.core.Utils.makeAbsolutePath(url), eThemeLoaded);
+			self.cl().initializer().load(a5.cl.core.Utils.makeAbsolutePath(url), eThemeLoaded);
 		}
 		
 		var eThemeLoaded = function(data){
@@ -39,9 +39,9 @@ a5.Package('a5.cl.ui.core')
 			var styles = parser.buildStyles(obj.constructor, {
 				variant: variant,
 				state: state,
-				environment: this.cl().clientEnvironment(),
-				platform: this.cl().clientPlatform(),
-				orientation: this.cl().clientOrientation()
+				environment: this.DOM().clientEnvironment(),
+				platform: this.DOM().clientPlatform(),
+				orientation: this.DOM().clientOrientation()
 			}), prop;
 			for(prop in styles){
 				var spl = prop.split('_'),

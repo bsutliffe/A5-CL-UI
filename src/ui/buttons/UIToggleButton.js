@@ -1,4 +1,3 @@
-
 a5.Package('a5.cl.ui.buttons')
 
 	.Extends('UIButton')
@@ -11,21 +10,21 @@ a5.Package('a5.cl.ui.buttons')
 		};
 		
 		
-		var Private = this.PrivateProperties(function(){
-			this.toggled = false;
+		this.Properties(function(){
+			this._cl_toggled = false;
 		})
 		
 		proto.UIToggleButton = function(toggled){
 			proto.superclass(this);
-			Private(this).toggled = toggled;
+			this._cl_toggled = toggled;
 		}
 		
 		proto.Override.childrenReady = function(){
-			this._cl_setToggle(Private(this).toggled);
+			this._cl_setToggle(this._cl_toggled);
 		}
 		
 		proto.Override._cl_onMouseClick = function(e){
-			this._cl_setToggle(!Private(this).toggled);
+			this._cl_setToggle(this._cl_toggled);
 			proto.superclass()._cl_onMouseClick.call(this, e);
 		}
 		
@@ -34,11 +33,11 @@ a5.Package('a5.cl.ui.buttons')
 				this._cl_setToggle(value);
 			}
 			//TODO: forced ! because events are not fired here first
-			return !Private(this).toggled;
+			return !this._cl_toggled.toggled;
 		}
 		
 		proto._cl_setToggle = function(value){
-			Private(this).toggled = value;
+			this._cl_toggled = value;
 			this.toggledView().visible(value);
 			this.untoggledView().visible(!value);
 		}

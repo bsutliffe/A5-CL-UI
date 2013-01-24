@@ -162,10 +162,10 @@ a5.Package('a5.cl.ui.form')
 		
 		proto._cl_addFocusEvents = function(elem){
 			var self = this;
-			im.Utils.addEventListener(elem, 'focus', function(e){
+			a5.cl.initializers.dom.Utils.addEventListener(elem, 'focus', function(e){
 				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.FOCUS, e]));
 			});
-			im.Utils.addEventListener(elem, 'blur', function(e){
+			a5.cl.initializers.dom.Utils.addEventListener(elem, 'blur', function(e){
 				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.BLUR, e]));
 				if(self._cl_validateOnBlur)
 					self.validate();
