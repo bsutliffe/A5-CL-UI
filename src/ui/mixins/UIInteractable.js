@@ -110,7 +110,7 @@ a5.Package('a5.cl.ui.mixins')
 		proto.contextMenu = function(view){
 			if(view instanceof a5.cl.CLView || view === null || view === false){
 				if(!this._cl_contextMenuWindow)
-					this._cl_contextMenuWindow = this.create(a5.cl.ui.modals.UIContextMenuWindow);
+					this._cl_contextMenuWindow = new a5.cl.ui.modals.UIContextMenuWindow();
 				this._cl_contextMenuWindow.menuView(view);
 				if(view)
 					this.addEventListener(im.UIMouseEvent.RIGHT_CLICK, proto._cl_showContextMenu, false, this);
@@ -129,7 +129,7 @@ a5.Package('a5.cl.ui.mixins')
 			if(this.enabled()){
 				var isRightClick = e.button === 2;
 				if(!isRightClick){
-					var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.CLICK, e]);
+					var evt = new im.UIMouseEvent(im.UIMouseEvent.CLICK, e);
 					evt.shouldRetain(true);
 					this.dispatchEvent(evt);
 					var preventDefault = evt._cl_preventDefault;
@@ -142,7 +142,7 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto._cl_eDoubleClickHandler = function(e){
 			if(this.enabled()){
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.DOUBLE_CLICK, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.DOUBLE_CLICK, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;
@@ -153,7 +153,7 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto._cl_eMouseDownHandler = function(e){
 			if(this.enabled()){
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_DOWN, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_DOWN, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;
@@ -165,7 +165,7 @@ a5.Package('a5.cl.ui.mixins')
 		proto._cl_eMouseUpHandler = function(e){
 			if (this.enabled()) {
 				var isRightClick = e.button === 2,
-					evt = this.create(im.UIMouseEvent, [isRightClick ? im.UIMouseEvent.RIGHT_CLICK : im.UIMouseEvent.MOUSE_UP, e]);
+					evt = new im.UIMouseEvent(isRightClick ? im.UIMouseEvent.RIGHT_CLICK : im.UIMouseEvent.MOUSE_UP, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;

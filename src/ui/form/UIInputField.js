@@ -58,7 +58,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.useHistory = function(value){
 			if(value === true && !this._cl_dataStore)
-				this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
+				this._cl_dataStore = new a5.cl.ui.form.InputFieldDataStore();
 			else
 				this._cl_dataStore = null;
 		}

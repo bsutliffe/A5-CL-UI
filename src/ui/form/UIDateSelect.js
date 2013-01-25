@@ -34,7 +34,7 @@ a5.Package('a5.cl.ui.form')
 		
 		cls.UIDateSelect = function(){
 			cls.superclass(this);
-			this._cl_element = this.create(im.UIInputField).width(380).enabled(false);
+			this._cl_element = new im.UIInputField().width(380).enabled(false);
 			this._cl_element.includeInParentForm(false);
 			this._cl_element.element().style.fontSize = '10px';
 			this._cl_element.element().style.textAlign = 'center';
@@ -44,42 +44,42 @@ a5.Package('a5.cl.ui.form')
 			cls.superclass().viewReady.apply(this, arguments);
 			this.relY(true).height('auto');
 			this.inputView().width(0);
-			var wrapper = this.create(a5.cl.CLViewContainer);
+			var wrapper = new a5.cl.CLViewContainer();
 			wrapper.relX(true).height('auto').border(1).width(380).padding(2);
 			this.addSubView(this._cl_element);
-			this._cl_monthSelect = this.create(im.UISelect).label('Month').width(100).relY(true).includeInParentForm(false);
+			this._cl_monthSelect = new im.UISelect().label('Month').width(100).relY(true).includeInParentForm(false);
 			this._cl_monthSelect.inputView().width(100);
 			this._cl_monthSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-			this._cl_daySelect = this.create(im.UISelect).label('Day').width(50).relY(true).x(5).includeInParentForm(false);
+			this._cl_daySelect = new im.UISelect().label('Day').width(50).relY(true).x(5).includeInParentForm(false);
 			this._cl_daySelect.inputView().width(50);
 			this._cl_daySelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-			this._cl_yearSelect = this.create(im.UISelect).label('Year').width(100).relY(true).x(5).includeInParentForm(false);
+			this._cl_yearSelect = new im.UISelect().label('Year').width(100).relY(true).x(5).includeInParentForm(false);
 			this._cl_yearSelect.inputView().width(100);
 			this._cl_yearSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
 			wrapper.addSubView(this._cl_monthSelect);
 			wrapper.addSubView(this._cl_daySelect);
 			wrapper.addSubView(this._cl_yearSelect);
 			if(this.showTime()){
-				this._cl_hourSelect = this.create(im.UISelect).label('Hour').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_hourSelect = new im.UISelect().label('Hour').width(50).relY(true).x(5).includeInParentForm(false);
 				this._cl_hourSelect.inputView().width(50);
 				this._cl_hourSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-				this._cl_minuteSelect = this.create(im.UISelect).label('Minute').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_minuteSelect = new im.UISelect().label('Minute').width(50).relY(true).x(5).includeInParentForm(false);
 				this._cl_minuteSelect.inputView().width(50);
 				this._cl_minuteSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
 				wrapper.addSubView(this._cl_hourSelect);
 				wrapper.addSubView(this._cl_minuteSelect);
 			}
 			this.addSubView(wrapper);
-			var btnWrapper = this.create(a5.cl.CLViewContainer);
+			var btnWrapper = new a5.cl.CLViewContainer();
 			btnWrapper.relX(true).height('auto')
 			if(this.showClear()){
-				var clearBtn = this.create(im.UIButton).label('Clear Date');
+				var clearBtn = new im.UIButton().label('Clear Date');
 				clearBtn.height(20).width('auto').labelView().fontSize(10);
 				clearBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_clearValues, false, this);
 				btnWrapper.addSubView(clearBtn);
 			}
 			if(this.showSelectNow()){
-				var showNowBtn = this.create(im.UIButton).label('Set To Now');
+				var showNowBtn = new im.UIButton().label('Set To Now');
 				showNowBtn.height(20).width('auto').labelView().fontSize(10);
 				showNowBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_setToNow, false, this);
 				btnWrapper.addSubView(showNowBtn);

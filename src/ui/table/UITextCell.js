@@ -6,8 +6,7 @@ a5.Package('a5.cl.ui.table')
 		
 		proto.UITextCell = function(text){
 			proto.superclass(this);
-			this._cl_textField = this.create(im.UITextField)
-				.width('100%').height('auto').alignY('middle');
+			this._cl_textField = new im.UITextField().width('100%').height('auto').alignY('middle');
 			this._cl_textField.addEventListener('CONTENT_UPDATED', function(e){
 				this.redraw();
 			}, false, this);

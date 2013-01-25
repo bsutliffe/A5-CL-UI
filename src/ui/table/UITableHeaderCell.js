@@ -45,8 +45,8 @@ a5.Package('a5.cl.ui.table')
 			this._cl_sortable = false;
 			this._cl_sortFunction = UITableHeaderCell.sortAlpha;
 			this._cl_sortDirection = UITableHeaderCell.ASCENDING;
-			this._cl_textField = this.create(im.UITextField);
-			this._cl_sortArrow = this.create(a5.cl.CLHTMLView).width(8).height(8).alignX('right').alignY('middle').visible(false);
+			this._cl_textField = new im.UITextField();
+			this._cl_sortArrow = new a5.cl.CLHTMLView().width(8).height(8).alignX('right').alignY('middle').visible(false);
 			this._cl_column = null;
 			this._cl_columnIndex = 0;
 			
@@ -71,7 +71,7 @@ a5.Package('a5.cl.ui.table')
 				//If we're already sorting on this column, flip the sort direction
 				if(this._cl_sortArrow.visible())
 					this._cl_sortDirection = (this._cl_sortDirection === UITableHeaderCell.ASCENDING ? UITableHeaderCell.DESCENDING : UITableHeaderCell.ASCENDING);
-				this.dispatchEvent(this.create(im.UITableEvent, [im.UITableEvent.SORT_ROWS, false, this, this._cl_sortDirection]));
+				this.dispatchEvent(new im.UITableEvent(im.UITableEvent.SORT_ROWS, false, this, this._cl_sortDirection));
 			}, false, this);
 		}
 		

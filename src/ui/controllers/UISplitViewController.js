@@ -14,8 +14,8 @@ a5.Package('a5.cl.ui.controllers')
 		proto.UISplitViewController = function(){
 			this._cl_menuView;
 			this._cl_contentView;
-			this._cl_menuView = this.create(im.UIResizable);
-			this._cl_contentView = this.create(a5.cl.CLViewContainer);
+			this._cl_menuView = new im.UIResizable();
+			this._cl_contentView = new a5.cl.CLViewContainer();
 			this._cl_menuView.width(300).minWidth(150).maxWidth(500).border(1);
 			this._cl_contentView.border(1);
 			proto.superclass(this, arguments);

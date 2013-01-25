@@ -19,11 +19,11 @@ a5.Package('a5.cl.ui')
 			var self = this;
 			this._cl_viewElement.onmouseover = function(e){
 				if(self._cl_enabled)
-					self.dispatchEvent(self.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OVER, e || window.event]));
+					self.dispatchEvent(new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OVER, e || window.event));
 			}
 			this._cl_viewElement.onmouseout = function(e){
 				if(self._cl_enabled)
-					self.dispatchEvent(self.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OUT, e || window.event]));
+					self.dispatchEvent(new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OUT, e || window.event));
 			}
 		}
 		

@@ -10,7 +10,7 @@ a5.Package('a5.cl.ui.core')
 		
 		self.ThemeManager = function(){
 			self.superclass(this);
-			parser = this.create(im.ThemeParser);
+			parser = new im.ThemeParser();
 		}
 		
 		self.loadTheme = function(url){

@@ -8,9 +8,9 @@ a5.Package('a5.cl.ui')
 		proto.UIDefaultTabView = function(){
 			proto.superclass(this);
 			this._cl_staticWidth = false;
-			this._cl_backgroundView = this.create(im.CLView);
+			this._cl_backgroundView = new im.CLView();
 			this._cl_backgroundView.border(1, 'solid', '#c8c6c4').backgroundColor('#e6e4e3');
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_labelView = new im.UITextField();
 			this._cl_labelView.alignY('middle');
 			this._cl_labelView.textAlign('center');
 			

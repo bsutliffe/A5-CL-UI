@@ -12,7 +12,7 @@ a5.Package('a5.cl.ui')
 		
 		
 		proto.UIResizable = function(coordinates){
-			this._cl_contentView = this.create(a5.cl.ui.UIControl).width('100%').height('100%');
+			this._cl_contentView = new a5.cl.ui.UIControl().width('100%').height('100%');
 			this._cl_handles = {};
 			if(typeof coordinates == 'string'){
 				this._cl_coordinates = [];
@@ -133,7 +133,7 @@ a5.Package('a5.cl.ui')
 		
 		proto._cl_createHandle = function(direction){
 			//create a new button to act as the handle
-			var handle = this.create(a5.cl.ui.UIControl).clickEnabled(true);
+			var handle = new a5.cl.ui.UIControl().clickEnabled(true);
 			handle.handleDirection = direction;
 			this._cl_handles[direction] = handle;
 			a5.cl.CLViewContainer.prototype.addSubView.call(this, handle);
@@ -159,7 +159,7 @@ a5.Package('a5.cl.ui')
 				self._cl_cachedMouseX = e.screenX();
 				self._cl_cachedMouseY = e.screenY();
 				
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZE_STARTED]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZE_STARTED));
 				im.Utils.addEventListener(window, 'mousemove', mouseMove, false);
 				im.Utils.addEventListener(window, 'mouseup', mouseUp, false);
 				e.preventDefault();
@@ -169,7 +169,7 @@ a5.Package('a5.cl.ui')
 				self._cl_resizing = false;
 				im.Utils.removeEventListener(window, 'mousemove', mouseMove, false);
 				im.Utils.removeEventListener(window, 'mouseup', mouseUp, false);
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZE_STOPPED]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZE_STOPPED));
 			}
 			
 			var mouseMove = function(e){
@@ -185,7 +185,7 @@ a5.Package('a5.cl.ui')
 				
 				self.resized.call(self);
 				if(self._cl_resizeEventsEnabled)
-					self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZED]));
+					self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZED));
 				return false;
 			}
 			

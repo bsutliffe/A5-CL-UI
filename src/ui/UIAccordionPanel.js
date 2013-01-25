@@ -27,7 +27,7 @@ a5.Package('a5.cl.ui')
 			var self = this;
 			this.clickEnabled(true);
 			this.addEventListener(im.UIMouseEvent.CLICK, function(e){
-				self.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.SELECT]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.SELECT));
 			});
 		}
 		

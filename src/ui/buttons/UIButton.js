@@ -36,7 +36,7 @@ a5.Package('a5.cl.ui.buttons')
 		
 		proto.UIButton = function(label){
 			proto.superclass(this);
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_labelView = new im.UITextField();
 			this._cl_data = null;
 			this._cl_state = 'up';
 			this._cl_labelView.width('auto')
@@ -84,7 +84,7 @@ a5.Package('a5.cl.ui.buttons')
 				if(!this._cl_selected)
 					this.themeState('over')
 				//dispatch the event
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OVER, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OVER, e);
 				this.dispatchEvent(evt);
 			}
 		}
@@ -97,7 +97,7 @@ a5.Package('a5.cl.ui.buttons')
 				if(!this._cl_selected)
 					this.themeState('up');
 				//dispatch the event
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OUT, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OUT, e);
 				this.dispatchEvent(evt);
 			}
 		}

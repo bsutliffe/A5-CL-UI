@@ -24,9 +24,9 @@ a5.Package('a5.cl.ui.list')
 			this.addEventListener(im.UIEvent.SELECT, function(e){
 				var targetItem = e.target();
 				if(targetItem.subList() instanceof im.UIListView)
-					self.dispatchEvent(self.create(im.UIListEvent, [targetItem.isExpanded() ? im.UIListEvent.ITEM_EXPANDED : im.UIListEvent.ITEM_COLLAPSED, true, targetItem]));
+					self.dispatchEvent(new im.UIListEvent(targetItem.isExpanded() ? im.UIListEvent.ITEM_EXPANDED : im.UIListEvent.ITEM_COLLAPSED, true, targetItem));
 				else
-					self.dispatchEvent(self.create(im.UIListEvent, [im.UIListEvent.ITEM_SELECTED, true, targetItem]));
+					self.dispatchEvent(new im.UIListEvent(im.UIListEvent.ITEM_SELECTED, true, targetItem));
 				if(self._cl_isSubList)
 					e.cancel();
 			});

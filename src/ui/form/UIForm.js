@@ -148,7 +148,7 @@ a5.Package('a5.cl.ui.form')
 			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
 				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(this.create(im.CLEvent, [im.CLEvent.ADDED_TO_PARENT]));
+					view.subViewAtIndex(x).dispatchEvent(new im.CLEvent(im.CLEvent.ADDED_TO_PARENT));
 				}
 			}
 		}

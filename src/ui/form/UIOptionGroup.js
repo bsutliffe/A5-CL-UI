@@ -166,7 +166,7 @@ a5.Package('a5.cl.ui.form')
 			if (this._cl_allowMultiple) {
 				if (!im.Utils.arrayContains(this._cl_selectedOption, option)) {
 					this._cl_selectedOption.push(option);
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				}
 			} else {
 				var prevSelection = this._cl_selectedOption;
@@ -178,7 +178,7 @@ a5.Package('a5.cl.ui.form')
 					thisOption.selected(selected);
 				}
 				if (this._cl_selectedOption !== prevSelection) 
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 			}
 		}
 		
@@ -187,7 +187,7 @@ a5.Package('a5.cl.ui.form')
 				var idx = im.Utils.arrayIndexOf(this._cl_selectedOption, option);
 				if(idx >= 0){
 					this._cl_selectedOption.splice(idx, 1);
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				}
 			}
 		}

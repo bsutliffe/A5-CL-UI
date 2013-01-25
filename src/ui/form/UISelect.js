@@ -84,7 +84,7 @@ a5.Package('a5.cl.ui.form')
 			sel.selectedIndex = selectedIndex;
 			var self = this;
 			sel.onchange = function(e){
-				self.dispatchEvent(self.create(a5.cl.ui.events.UIEvent, [a5.cl.ui.events.UIEvent.CHANGE, e || window.event]));
+				self.dispatchEvent(new a5.cl.ui.events.UIEvent(a5.cl.ui.events.UIEvent.CHANGE, e || window.event));
 			};
 			this._cl_select = sel;
 			sel = null;

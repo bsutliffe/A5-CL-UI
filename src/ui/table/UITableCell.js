@@ -12,7 +12,7 @@ a5.Package('a5.cl.ui.table')
 		this.Properties(function(){
 			this._cl_viewElementType = 'td';
 			this._cl_defaultDisplayStyle = '';
-			this._cl_contentWrapper = this.create(im.CLViewContainer);
+			this._cl_contentWrapper = new im.CLViewContainer();
 		})
 		
 		proto.UITableCell = function(){

@@ -5,6 +5,6 @@ a5.Package('a5.cl.ui')
 	.Prototype('UIController', function(proto, im){
 		
 		proto.UIController = function(defaultView){
-			proto.superclass(this, [defaultView || this.create(a5.cl.CLWindow)]);
+			proto.superclass(this, [defaultView || new a5.cl.CLWindow()]);
 		}
 });

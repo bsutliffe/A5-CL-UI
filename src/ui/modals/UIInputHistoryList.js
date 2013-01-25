@@ -35,7 +35,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 	})
 	.Class('UIInputHistoryList', 'singleton', function(self, im){
-		var optionGroup = this.create(a5.cl.ui.form.UIOptionGroup, ['inputHistoryList']),
+		var optionGroup = new a5.cl.ui.form.UIOptionGroup('inputHistoryList'),
 			historyArray = [],
 			input = null,
 			isOpen = false,
@@ -47,7 +47,7 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_windowLevel = a5.cl.CLWindowLevel.CONTEXT;
 			
 			optionGroup.addEventListener(im.UIEvent.CHANGE, function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.CHANGE]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 			});
 		}
 		
@@ -81,7 +81,7 @@ a5.Package('a5.cl.ui.modals')
 			if (isOpen) {
 				this.cl().application().removeWindow(this, false);
 				isOpen = false;
-				this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CLOSE]));
+				this.dispatchEvent(new im.UIEvent(im.UIEvent.CLOSE));
 			}
 		}
 		
@@ -92,7 +92,7 @@ a5.Package('a5.cl.ui.modals')
 				for (var x = 0, y = historyArray.length; x < y; x++) {
 					this.addSubView(getListButton(historyArray[x]).data(x).selected(/*x === 0*/false));
 				}
-				//this.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.CHANGE]));
+				//this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				optionGroup.selectedOption(null);
 			} else {
 				this.close();
@@ -135,7 +135,7 @@ a5.Package('a5.cl.ui.modals')
 			if(buttonCache[label])
 				return buttonCache[label];
 			//otherwise, create a new one
-			var button = self.create(im.UIButton, [label]);
+			var button = new im.UIButton(label);
 			button.width('100%').height(25)
 				.upBorder({top:0, right:0, left:0, bottom:1}).overBorder({bottom:1}).downBorder({bottom:1}).selectedBorder({bottom:1})
 				.upColor('#fff').overColor('#aaa').downColor('#aaa').selectedColor('#aaa')

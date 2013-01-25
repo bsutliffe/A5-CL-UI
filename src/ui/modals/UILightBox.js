@@ -37,9 +37,9 @@ a5.Package('a5.cl.ui.modals')
 		proto.UILightBox = function(){
 			proto.superclass(this);
 			
-			this._cl_bgView = this.create(im.UIControl).width('100%').height('100%')
+			this._cl_bgView = new im.UIControl().width('100%').height('100%')
 				.clickEnabled(true).usePointer(true).backgroundColor('#000').alpha(.5);
-			this._cl_contentView = this.create(im.CLViewContainer)
+			this._cl_contentView = new im.CLViewContainer()
 				.height('auto').width('auto').alignX('center').alignY('middle').backgroundColor('#fff');
 		}
 		

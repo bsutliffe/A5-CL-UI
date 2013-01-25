@@ -11,7 +11,7 @@ a5.Package('a5.cl.ui')
 			this.configDefaults({
 				themeURL:null
 			});
-			themeManager = this.create(a5.cl.ui.core.ThemeManager);
+			themeManager = new a5.cl.ui.core.ThemeManager();
 		}
 		
 		self.Override.initializePlugin = function(){
@@ -311,7 +311,7 @@ a5.Package('a5.cl.ui.core')
 		
 		self.ThemeManager = function(){
 			self.superclass(this);
-			parser = this.create(im.ThemeParser);
+			parser = new im.ThemeParser();
 		}
 		
 		self.loadTheme = function(url){
@@ -763,7 +763,7 @@ a5.Package('a5.cl.ui.mixins')
 		proto.contextMenu = function(view){
 			if(view instanceof a5.cl.CLView || view === null || view === false){
 				if(!this._cl_contextMenuWindow)
-					this._cl_contextMenuWindow = this.create(a5.cl.ui.modals.UIContextMenuWindow);
+					this._cl_contextMenuWindow = new a5.cl.ui.modals.UIContextMenuWindow();
 				this._cl_contextMenuWindow.menuView(view);
 				if(view)
 					this.addEventListener(im.UIMouseEvent.RIGHT_CLICK, proto._cl_showContextMenu, false, this);
@@ -782,7 +782,7 @@ a5.Package('a5.cl.ui.mixins')
 			if(this.enabled()){
 				var isRightClick = e.button === 2;
 				if(!isRightClick){
-					var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.CLICK, e]);
+					var evt = new im.UIMouseEvent(im.UIMouseEvent.CLICK, e);
 					evt.shouldRetain(true);
 					this.dispatchEvent(evt);
 					var preventDefault = evt._cl_preventDefault;
@@ -795,7 +795,7 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto._cl_eDoubleClickHandler = function(e){
 			if(this.enabled()){
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.DOUBLE_CLICK, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.DOUBLE_CLICK, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;
@@ -806,7 +806,7 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto._cl_eMouseDownHandler = function(e){
 			if(this.enabled()){
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_DOWN, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_DOWN, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;
@@ -818,7 +818,7 @@ a5.Package('a5.cl.ui.mixins')
 		proto._cl_eMouseUpHandler = function(e){
 			if (this.enabled()) {
 				var isRightClick = e.button === 2,
-					evt = this.create(im.UIMouseEvent, [isRightClick ? im.UIMouseEvent.RIGHT_CLICK : im.UIMouseEvent.MOUSE_UP, e]);
+					evt = new im.UIMouseEvent(isRightClick ? im.UIMouseEvent.RIGHT_CLICK : im.UIMouseEvent.MOUSE_UP, e);
 				evt.shouldRetain(true);
 				this.dispatchEvent(evt);
 				var preventDefault = evt._cl_preventDefault;
@@ -928,10 +928,10 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto.UIKeyboardEventDispatcher = function(){
 			//create events that will be retained and reused
-			this._cl_keyUpEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_UP]).shouldRetain(true);
-			this._cl_keyDownEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_DOWN]).shouldRetain(true);
-			this._cl_keyPressEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_PRESS]).shouldRetain(true);
-			this._cl_enterKeyEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.ENTER_KEY]).shouldRetain(true);
+			this._cl_keyUpEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_UP).shouldRetain(true);
+			this._cl_keyDownEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_DOWN).shouldRetain(true);
+			this._cl_keyPressEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_PRESS).shouldRetain(true);
+			this._cl_enterKeyEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.ENTER_KEY).shouldRetain(true);
 			
 			//create the event handlers
 			var self = this;
@@ -1076,7 +1076,7 @@ a5.Package('a5.cl.ui')
 	.Prototype('UIController', function(proto, im){
 		
 		proto.UIController = function(defaultView){
-			proto.superclass(this, [defaultView || this.create(a5.cl.CLWindow)]);
+			proto.superclass(this, [defaultView || new a5.cl.CLWindow()]);
 		}
 });
 
@@ -1636,11 +1636,11 @@ a5.Package('a5.cl.ui')
 			var self = this;
 			this._cl_viewElement.onmouseover = function(e){
 				if(self._cl_enabled)
-					self.dispatchEvent(self.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OVER, e || window.event]));
+					self.dispatchEvent(new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OVER, e || window.event));
 			}
 			this._cl_viewElement.onmouseout = function(e){
 				if(self._cl_enabled)
-					self.dispatchEvent(self.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OUT, e || window.event]));
+					self.dispatchEvent(new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OUT, e || window.event));
 			}
 		}
 		
@@ -1776,7 +1776,7 @@ a5.Package('a5.cl.ui')
 		
 		
 		proto.UIResizable = function(coordinates){
-			this._cl_contentView = this.create(a5.cl.ui.UIControl).width('100%').height('100%');
+			this._cl_contentView = new a5.cl.ui.UIControl().width('100%').height('100%');
 			this._cl_handles = {};
 			if(typeof coordinates == 'string'){
 				this._cl_coordinates = [];
@@ -1897,7 +1897,7 @@ a5.Package('a5.cl.ui')
 		
 		proto._cl_createHandle = function(direction){
 			//create a new button to act as the handle
-			var handle = this.create(a5.cl.ui.UIControl).clickEnabled(true);
+			var handle = new a5.cl.ui.UIControl().clickEnabled(true);
 			handle.handleDirection = direction;
 			this._cl_handles[direction] = handle;
 			a5.cl.CLViewContainer.prototype.addSubView.call(this, handle);
@@ -1923,7 +1923,7 @@ a5.Package('a5.cl.ui')
 				self._cl_cachedMouseX = e.screenX();
 				self._cl_cachedMouseY = e.screenY();
 				
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZE_STARTED]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZE_STARTED));
 				im.Utils.addEventListener(window, 'mousemove', mouseMove, false);
 				im.Utils.addEventListener(window, 'mouseup', mouseUp, false);
 				e.preventDefault();
@@ -1933,7 +1933,7 @@ a5.Package('a5.cl.ui')
 				self._cl_resizing = false;
 				im.Utils.removeEventListener(window, 'mousemove', mouseMove, false);
 				im.Utils.removeEventListener(window, 'mouseup', mouseUp, false);
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZE_STOPPED]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZE_STOPPED));
 			}
 			
 			var mouseMove = function(e){
@@ -1949,7 +1949,7 @@ a5.Package('a5.cl.ui')
 				
 				self.resized.call(self);
 				if(self._cl_resizeEventsEnabled)
-					self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.RESIZED]));
+					self.dispatchEvent(new im.UIEvent(im.UIEvent.RESIZED));
 				return false;
 			}
 			
@@ -2355,7 +2355,7 @@ a5.Package('a5.cl.ui')
 			var self = this;
 			this.clickEnabled(true);
 			this.addEventListener(im.UIMouseEvent.CLICK, function(e){
-				self.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.SELECT]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.SELECT));
 			});
 		}
 		
@@ -2556,9 +2556,9 @@ a5.Package('a5.cl.ui')
 		proto.UIDefaultTabView = function(){
 			proto.superclass(this);
 			this._cl_staticWidth = false;
-			this._cl_backgroundView = this.create(im.CLView);
+			this._cl_backgroundView = new im.CLView();
 			this._cl_backgroundView.border(1, 'solid', '#c8c6c4').backgroundColor('#e6e4e3');
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_labelView = new im.UITextField();
 			this._cl_labelView.alignY('middle');
 			this._cl_labelView.textAlign('center');
 			
@@ -2618,8 +2618,8 @@ a5.Package('a5.cl.ui.controllers')
 		proto.UISplitViewController = function(){
 			this._cl_menuView;
 			this._cl_contentView;
-			this._cl_menuView = this.create(im.UIResizable);
-			this._cl_contentView = this.create(a5.cl.CLViewContainer);
+			this._cl_menuView = new im.UIResizable();
+			this._cl_contentView = new a5.cl.CLViewContainer();
 			this._cl_menuView.width(300).minWidth(150).maxWidth(500).border(1);
 			this._cl_contentView.border(1);
 			proto.superclass(this, arguments);
@@ -2693,15 +2693,15 @@ a5.Package('a5.cl.ui.controllers')
 		})
 		
 		proto.UITabViewController = function(def){
-			this._cl_tabBarView = this.create(im.CLViewContainer);
-			this._cl_tabBarBG = this.create(im.CLViewContainer);
-			this._cl_tabBarWrapper = this.create(im.CLViewContainer);
-			this._cl_contentView = this.create(a5.cl.ui.UIFlexSpace);
+			this._cl_tabBarView = new im.CLViewContainer();
+			this._cl_tabBarBG = new im.CLViewContainer();
+			this._cl_tabBarWrapper = new im.CLViewContainer();
+			this._cl_contentView = new a5.cl.ui.UIFlexSpace();
 			
 			this._cl_tabBarWrapper.height(25);
 			this._cl_tabBarView.relX(true);
 			this._cl_contentView.height('-25');
-			proto.superclass(this, [def || this.create(a5.cl.ui.UIContainer)]);
+			proto.superclass(this, [def || new a5.cl.ui.UIContainer()]);
 		}
 		
 		proto.Override.viewReady = function(){
@@ -2781,7 +2781,7 @@ a5.Package('a5.cl.ui.controllers')
 		function(args){	
 			if(args){
 				//create or get the tab
-				var newTab = args.tabView || this.create(this._cl_tabViewClass);
+				var newTab = args.tabView || new this._cl_tabViewClass();
 				//keep a reference to the views
 				this._cl_tabs.splice(args.index, 0, {
 					tabView: newTab,
@@ -3000,7 +3000,7 @@ a5.Package('a5.cl.ui.controllers')
 			if(nodeName === 'Tab'){
 				var children = a5.cl.mvc.core.XMLUtils.children(node.node);
 				if(children.length > 0) {
-					var builder = this.create(a5.cl.core.viewDef.ViewBuilder, [this, children[0], defaults, imports, rootView]),
+					var builder = new a5.cl.core.viewDef.ViewBuilder(this, children[0], defaults, imports, rootView),
 						targetIndex = this.tabCount();
 					this._cl_pendingTabs++;
 					builder.build(function(view){
@@ -3194,7 +3194,7 @@ a5.Package('a5.cl.ui.form')
 			if (this._cl_allowMultiple) {
 				if (!im.Utils.arrayContains(this._cl_selectedOption, option)) {
 					this._cl_selectedOption.push(option);
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				}
 			} else {
 				var prevSelection = this._cl_selectedOption;
@@ -3206,7 +3206,7 @@ a5.Package('a5.cl.ui.form')
 					thisOption.selected(selected);
 				}
 				if (this._cl_selectedOption !== prevSelection) 
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 			}
 		}
 		
@@ -3215,7 +3215,7 @@ a5.Package('a5.cl.ui.form')
 				var idx = im.Utils.arrayIndexOf(this._cl_selectedOption, option);
 				if(idx >= 0){
 					this._cl_selectedOption.splice(idx, 1);
-					this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CHANGE]));
+					this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				}
 			}
 		}
@@ -3244,8 +3244,8 @@ a5.Package('a5.cl.ui.form')
 			
 		this.Properties(function(){
 			this._cl_element = null;
-			this._cl_inputView = this.create(im.UIHTMLControl).height('auto').width('100%').clickHandlingEnabled(false);
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_inputView = new im.UIHTMLControl().height('auto').width('100%').clickHandlingEnabled(false);
+			this._cl_labelView = new im.UITextField();
 			this._cl_labelViewAdded = false;
 			this._cl_required = false;
 			this._cl_validation = null;
@@ -3254,7 +3254,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_includeInParentForm = true;
 			this._cl_value = null;
 			this._cl_form = null;
-			this._cl_changeEvent = this.create(im.UIEvent, [im.UIEvent.CHANGE]).shouldRetain(true);
+			this._cl_changeEvent = new im.UIEvent(im.UIEvent.CHANGE).shouldRetain(true);
 			this._cl_validationStates = [];
 			this._cl_errorColor = null;
 			this._cl_defaultColor = null;
@@ -3391,10 +3391,10 @@ a5.Package('a5.cl.ui.form')
 		proto._cl_addFocusEvents = function(elem){
 			var self = this;
 			a5.cl.initializers.dom.Utils.addEventListener(elem, 'focus', function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.FOCUS, e]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.FOCUS, e));
 			});
 			a5.cl.initializers.dom.Utils.addEventListener(elem, 'blur', function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.BLUR, e]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.BLUR, e));
 				if(self._cl_validateOnBlur)
 					self.validate();
 			});
@@ -3570,7 +3570,7 @@ a5.Package('a5.cl.ui.form')
 			switch(nodeName){
 				case 'Label':
 				case 'Input':
-					var builder = this.create(a5.cl.core.viewDef.ViewBuilder, [this._cl_controller, node.node, defaults, imports, rootView]);
+					var builder = new a5.cl.core.viewDef.ViewBuilder(this._cl_controller, node.node, defaults, imports, rootView);
 					builder.build(null, null, null, nodeName === 'Label' ? this._cl_labelView : this._cl_inputView);
 					break;
 			}
@@ -3643,7 +3643,7 @@ a5.Package('a5.cl.ui.form')
 		
 		proto.useHistory = function(value){
 			if(value === true && !this._cl_dataStore)
-				this._cl_dataStore = this.create(a5.cl.ui.form.InputFieldDataStore);
+				this._cl_dataStore = new a5.cl.ui.form.InputFieldDataStore();
 			else
 				this._cl_dataStore = null;
 		}
@@ -4206,7 +4206,7 @@ a5.Package('a5.cl.ui.form')
 			sel.selectedIndex = selectedIndex;
 			var self = this;
 			sel.onchange = function(e){
-				self.dispatchEvent(self.create(a5.cl.ui.events.UIEvent, [a5.cl.ui.events.UIEvent.CHANGE, e || window.event]));
+				self.dispatchEvent(new a5.cl.ui.events.UIEvent(a5.cl.ui.events.UIEvent.CHANGE, e || window.event));
 			};
 			this._cl_select = sel;
 			sel = null;
@@ -4817,7 +4817,7 @@ a5.Package('a5.cl.ui.form')
 		
 		cls.UIDateSelect = function(){
 			cls.superclass(this);
-			this._cl_element = this.create(im.UIInputField).width(380).enabled(false);
+			this._cl_element = new im.UIInputField().width(380).enabled(false);
 			this._cl_element.includeInParentForm(false);
 			this._cl_element.element().style.fontSize = '10px';
 			this._cl_element.element().style.textAlign = 'center';
@@ -4827,42 +4827,42 @@ a5.Package('a5.cl.ui.form')
 			cls.superclass().viewReady.apply(this, arguments);
 			this.relY(true).height('auto');
 			this.inputView().width(0);
-			var wrapper = this.create(a5.cl.CLViewContainer);
+			var wrapper = new a5.cl.CLViewContainer();
 			wrapper.relX(true).height('auto').border(1).width(380).padding(2);
 			this.addSubView(this._cl_element);
-			this._cl_monthSelect = this.create(im.UISelect).label('Month').width(100).relY(true).includeInParentForm(false);
+			this._cl_monthSelect = new im.UISelect().label('Month').width(100).relY(true).includeInParentForm(false);
 			this._cl_monthSelect.inputView().width(100);
 			this._cl_monthSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-			this._cl_daySelect = this.create(im.UISelect).label('Day').width(50).relY(true).x(5).includeInParentForm(false);
+			this._cl_daySelect = new im.UISelect().label('Day').width(50).relY(true).x(5).includeInParentForm(false);
 			this._cl_daySelect.inputView().width(50);
 			this._cl_daySelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-			this._cl_yearSelect = this.create(im.UISelect).label('Year').width(100).relY(true).x(5).includeInParentForm(false);
+			this._cl_yearSelect = new im.UISelect().label('Year').width(100).relY(true).x(5).includeInParentForm(false);
 			this._cl_yearSelect.inputView().width(100);
 			this._cl_yearSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
 			wrapper.addSubView(this._cl_monthSelect);
 			wrapper.addSubView(this._cl_daySelect);
 			wrapper.addSubView(this._cl_yearSelect);
 			if(this.showTime()){
-				this._cl_hourSelect = this.create(im.UISelect).label('Hour').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_hourSelect = new im.UISelect().label('Hour').width(50).relY(true).x(5).includeInParentForm(false);
 				this._cl_hourSelect.inputView().width(50);
 				this._cl_hourSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
-				this._cl_minuteSelect = this.create(im.UISelect).label('Minute').width(50).relY(true).x(5).includeInParentForm(false);
+				this._cl_minuteSelect = new im.UISelect().label('Minute').width(50).relY(true).x(5).includeInParentForm(false);
 				this._cl_minuteSelect.inputView().width(50);
 				this._cl_minuteSelect.addEventListener(im.UIEvent.CHANGE, this._cl_selectionChangeHandler, false, this);
 				wrapper.addSubView(this._cl_hourSelect);
 				wrapper.addSubView(this._cl_minuteSelect);
 			}
 			this.addSubView(wrapper);
-			var btnWrapper = this.create(a5.cl.CLViewContainer);
+			var btnWrapper = new a5.cl.CLViewContainer();
 			btnWrapper.relX(true).height('auto')
 			if(this.showClear()){
-				var clearBtn = this.create(im.UIButton).label('Clear Date');
+				var clearBtn = new im.UIButton().label('Clear Date');
 				clearBtn.height(20).width('auto').labelView().fontSize(10);
 				clearBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_clearValues, false, this);
 				btnWrapper.addSubView(clearBtn);
 			}
 			if(this.showSelectNow()){
-				var showNowBtn = this.create(im.UIButton).label('Set To Now');
+				var showNowBtn = new im.UIButton().label('Set To Now');
 				showNowBtn.height(20).width('auto').labelView().fontSize(10);
 				showNowBtn.addEventListener(im.UIMouseEvent.CLICK, this._cl_setToNow, false, this);
 				btnWrapper.addSubView(showNowBtn);
@@ -5118,7 +5118,7 @@ a5.Package('a5.cl.ui.form')
 			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
 				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(this.create(im.CLEvent, [im.CLEvent.ADDED_TO_PARENT]));
+					view.subViewAtIndex(x).dispatchEvent(new im.CLEvent(im.CLEvent.ADDED_TO_PARENT));
 				}
 			}
 		}
@@ -5163,7 +5163,7 @@ a5.Package('a5.cl.ui.buttons')
 		
 		proto.UIButton = function(label){
 			proto.superclass(this);
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_labelView = new im.UITextField();
 			this._cl_data = null;
 			this._cl_state = 'up';
 			this._cl_labelView.width('auto')
@@ -5211,7 +5211,7 @@ a5.Package('a5.cl.ui.buttons')
 				if(!this._cl_selected)
 					this.themeState('over')
 				//dispatch the event
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OVER, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OVER, e);
 				this.dispatchEvent(evt);
 			}
 		}
@@ -5224,7 +5224,7 @@ a5.Package('a5.cl.ui.buttons')
 				if(!this._cl_selected)
 					this.themeState('up');
 				//dispatch the event
-				var evt = this.create(im.UIMouseEvent, [im.UIMouseEvent.MOUSE_OUT, e]);
+				var evt = new im.UIMouseEvent(im.UIMouseEvent.MOUSE_OUT, e);
 				this.dispatchEvent(evt);
 			}
 		}
@@ -5448,9 +5448,9 @@ a5.Package('a5.cl.ui.modals')
 		proto.UILightBox = function(){
 			proto.superclass(this);
 			
-			this._cl_bgView = this.create(im.UIControl).width('100%').height('100%')
+			this._cl_bgView = new im.UIControl().width('100%').height('100%')
 				.clickEnabled(true).usePointer(true).backgroundColor('#000').alpha(.5);
-			this._cl_contentView = this.create(im.CLViewContainer)
+			this._cl_contentView = new im.CLViewContainer()
 				.height('auto').width('auto').alignX('center').alignY('middle').backgroundColor('#fff');
 		}
 		
@@ -5647,7 +5647,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 	})
 	.Class('UIInputHistoryList', 'singleton', function(self, im){
-		var optionGroup = this.create(a5.cl.ui.form.UIOptionGroup, ['inputHistoryList']),
+		var optionGroup = new a5.cl.ui.form.UIOptionGroup('inputHistoryList'),
 			historyArray = [],
 			input = null,
 			isOpen = false,
@@ -5659,7 +5659,7 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_windowLevel = a5.cl.CLWindowLevel.CONTEXT;
 			
 			optionGroup.addEventListener(im.UIEvent.CHANGE, function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.CHANGE]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 			});
 		}
 		
@@ -5693,7 +5693,7 @@ a5.Package('a5.cl.ui.modals')
 			if (isOpen) {
 				this.cl().application().removeWindow(this, false);
 				isOpen = false;
-				this.dispatchEvent(this.create(im.UIEvent, [im.UIEvent.CLOSE]));
+				this.dispatchEvent(new im.UIEvent(im.UIEvent.CLOSE));
 			}
 		}
 		
@@ -5704,7 +5704,7 @@ a5.Package('a5.cl.ui.modals')
 				for (var x = 0, y = historyArray.length; x < y; x++) {
 					this.addSubView(getListButton(historyArray[x]).data(x).selected(/*x === 0*/false));
 				}
-				//this.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.CHANGE]));
+				//this.dispatchEvent(new im.UIEvent(im.UIEvent.CHANGE));
 				optionGroup.selectedOption(null);
 			} else {
 				this.close();
@@ -5747,7 +5747,7 @@ a5.Package('a5.cl.ui.modals')
 			if(buttonCache[label])
 				return buttonCache[label];
 			//otherwise, create a new one
-			var button = self.create(im.UIButton, [label]);
+			var button = new im.UIButton(label);
 			button.width('100%').height(25)
 				.upBorder({top:0, right:0, left:0, bottom:1}).overBorder({bottom:1}).downBorder({bottom:1}).selectedBorder({bottom:1})
 				.upColor('#fff').overColor('#aaa').downColor('#aaa').selectedColor('#aaa')
@@ -5822,11 +5822,11 @@ a5.Package('a5.cl.ui.modals')
 					.height('auto')
 					.width('100%').maxWidth(300);
 			
-			this._cl_messageField = this.create(im.UITextField).width('100%').height('auto').textAlign('center');
-			this._cl_continueButton = this.create(im.UIButton).label("OK");
-			this._cl_cancelButton = this.create(im.UIButton).label("Cancel");
-			this._cl_buttonHolder = this.create(im.UIContainer).relX(true).width('100%').height('auto').y(15);
-			this._cl_flexSpace = this.create(im.UIFlexSpace);
+			this._cl_messageField = new im.UITextField().width('100%').height('auto').textAlign('center');
+			this._cl_continueButton = new im.UIButton().label("OK");
+			this._cl_cancelButton =new im.UIButton().label("Cancel");
+			this._cl_buttonHolder = new im.UIContainer().relX(true).width('100%').height('auto').y(15);
+			this._cl_flexSpace = new im.UIFlexSpace();
 			
 			this._cl_continueButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eContinueButtonHandler, false, this);
 			this._cl_cancelButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eCancelButtonHandler, false, this);
@@ -5838,9 +5838,9 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_contentView.addSubView(this._cl_messageField);
 			this._cl_buttonHolder.addSubView(this._cl_flexSpace);
 			this._cl_buttonHolder.addSubView(this._cl_cancelButton);
-			this._cl_buttonHolder.addSubView(this.create(im.UIFlexSpace));
+			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
 			this._cl_buttonHolder.addSubView(this._cl_continueButton);
-			this._cl_buttonHolder.addSubView(this.create(im.UIFlexSpace));
+			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
 			this._cl_contentView.addSubView(this._cl_buttonHolder);
 		}
 		
@@ -5964,7 +5964,7 @@ a5.Package('a5.cl.ui.list')
 				
 		proto.Override.initHandle = function(){
 			//create the clickable handle
-			this._cl_handle = this.create(im.UIControl)
+			this._cl_handle = new im.UIControl()
 				.clickEnabled(true)
 				.usePointer(true)
 				.backgroundColor('#FFF', '#CCC')
@@ -5975,15 +5975,15 @@ a5.Package('a5.cl.ui.list')
 			
 			var self = this;
 			this._cl_handle.addEventListener(im.UIMouseEvent.CLICK, function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.SELECT]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.SELECT));
 			});
 			
 			//add the label to the handle
-			this._cl_labelView = this.create(im.UITextField).x(15).width('-15').alignY('middle').nonBreaking(true);
+			this._cl_labelView = new im.UITextField().x(15).width('-15').alignY('middle').nonBreaking(true);
 			this._cl_handle.addSubView(this._cl_labelView);
 			
 			//add the twisty arrow for expandable sections
-			this._cl_arrow = this.create(im.CLHTMLView).width(6).height(6).x(5).alignY('middle');
+			this._cl_arrow = new im.CLHTMLView().width(6).height(6).x(5).alignY('middle');
 			this._cl_handle.addSubView(this._cl_arrow);
 		}
 		
@@ -6142,9 +6142,9 @@ a5.Package('a5.cl.ui.list')
 			this.addEventListener(im.UIEvent.SELECT, function(e){
 				var targetItem = e.target();
 				if(targetItem.subList() instanceof im.UIListView)
-					self.dispatchEvent(self.create(im.UIListEvent, [targetItem.isExpanded() ? im.UIListEvent.ITEM_EXPANDED : im.UIListEvent.ITEM_COLLAPSED, true, targetItem]));
+					self.dispatchEvent(new im.UIListEvent(targetItem.isExpanded() ? im.UIListEvent.ITEM_EXPANDED : im.UIListEvent.ITEM_COLLAPSED, true, targetItem));
 				else
-					self.dispatchEvent(self.create(im.UIListEvent, [im.UIListEvent.ITEM_SELECTED, true, targetItem]));
+					self.dispatchEvent(new im.UIListEvent(im.UIListEvent.ITEM_SELECTED, true, targetItem));
 				if(self._cl_isSubList)
 					e.cancel();
 			});
@@ -6322,7 +6322,7 @@ a5.Package('a5.cl.ui.table')
 		this.Properties(function(){
 			this._cl_viewElementType = 'td';
 			this._cl_defaultDisplayStyle = '';
-			this._cl_contentWrapper = this.create(im.CLViewContainer);
+			this._cl_contentWrapper = new im.CLViewContainer();
 		})
 		
 		proto.UITableCell = function(){
@@ -6444,8 +6444,8 @@ a5.Package('a5.cl.ui.table')
 			this._cl_sortable = false;
 			this._cl_sortFunction = UITableHeaderCell.sortAlpha;
 			this._cl_sortDirection = UITableHeaderCell.ASCENDING;
-			this._cl_textField = this.create(im.UITextField);
-			this._cl_sortArrow = this.create(a5.cl.CLHTMLView).width(8).height(8).alignX('right').alignY('middle').visible(false);
+			this._cl_textField = new im.UITextField();
+			this._cl_sortArrow = new a5.cl.CLHTMLView().width(8).height(8).alignX('right').alignY('middle').visible(false);
 			this._cl_column = null;
 			this._cl_columnIndex = 0;
 			
@@ -6470,7 +6470,7 @@ a5.Package('a5.cl.ui.table')
 				//If we're already sorting on this column, flip the sort direction
 				if(this._cl_sortArrow.visible())
 					this._cl_sortDirection = (this._cl_sortDirection === UITableHeaderCell.ASCENDING ? UITableHeaderCell.DESCENDING : UITableHeaderCell.ASCENDING);
-				this.dispatchEvent(this.create(im.UITableEvent, [im.UITableEvent.SORT_ROWS, false, this, this._cl_sortDirection]));
+				this.dispatchEvent(new im.UITableEvent(im.UITableEvent.SORT_ROWS, false, this, this._cl_sortDirection));
 			}, false, this);
 		}
 		
@@ -7346,8 +7346,7 @@ a5.Package('a5.cl.ui.table')
 		
 		proto.UITextCell = function(text){
 			proto.superclass(this);
-			this._cl_textField = this.create(im.UITextField)
-				.width('100%').height('auto').alignY('middle');
+			this._cl_textField = new im.UITextField().width('100%').height('auto').alignY('middle');
 			this._cl_textField.addEventListener('CONTENT_UPDATED', function(e){
 				this.redraw();
 			}, false, this);

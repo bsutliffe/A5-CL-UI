@@ -16,8 +16,8 @@ a5.Package('a5.cl.ui.form')
 			
 		this.Properties(function(){
 			this._cl_element = null;
-			this._cl_inputView = this.create(im.UIHTMLControl).height('auto').width('100%').clickHandlingEnabled(false);
-			this._cl_labelView = this.create(im.UITextField);
+			this._cl_inputView = new im.UIHTMLControl().height('auto').width('100%').clickHandlingEnabled(false);
+			this._cl_labelView = new im.UITextField();
 			this._cl_labelViewAdded = false;
 			this._cl_required = false;
 			this._cl_validation = null;
@@ -26,7 +26,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_includeInParentForm = true;
 			this._cl_value = null;
 			this._cl_form = null;
-			this._cl_changeEvent = this.create(im.UIEvent, [im.UIEvent.CHANGE]).shouldRetain(true);
+			this._cl_changeEvent = new im.UIEvent(im.UIEvent.CHANGE).shouldRetain(true);
 			this._cl_validationStates = [];
 			this._cl_errorColor = null;
 			this._cl_defaultColor = null;
@@ -163,10 +163,10 @@ a5.Package('a5.cl.ui.form')
 		proto._cl_addFocusEvents = function(elem){
 			var self = this;
 			a5.cl.initializers.dom.Utils.addEventListener(elem, 'focus', function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.FOCUS, e]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.FOCUS, e));
 			});
 			a5.cl.initializers.dom.Utils.addEventListener(elem, 'blur', function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.BLUR, e]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.BLUR, e));
 				if(self._cl_validateOnBlur)
 					self.validate();
 			});
@@ -342,7 +342,7 @@ a5.Package('a5.cl.ui.form')
 			switch(nodeName){
 				case 'Label':
 				case 'Input':
-					var builder = this.create(a5.cl.core.viewDef.ViewBuilder, [this._cl_controller, node.node, defaults, imports, rootView]);
+					var builder = new a5.cl.core.viewDef.ViewBuilder(this._cl_controller, node.node, defaults, imports, rootView);
 					builder.build(null, null, null, nodeName === 'Label' ? this._cl_labelView : this._cl_inputView);
 					break;
 			}

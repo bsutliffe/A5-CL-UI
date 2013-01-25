@@ -16,10 +16,10 @@ a5.Package('a5.cl.ui.mixins')
 		
 		proto.UIKeyboardEventDispatcher = function(){
 			//create events that will be retained and reused
-			this._cl_keyUpEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_UP]).shouldRetain(true);
-			this._cl_keyDownEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_DOWN]).shouldRetain(true);
-			this._cl_keyPressEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.KEY_PRESS]).shouldRetain(true);
-			this._cl_enterKeyEvent = this.create(im.UIKeyboardEvent, [im.UIKeyboardEvent.ENTER_KEY]).shouldRetain(true);
+			this._cl_keyUpEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_UP).shouldRetain(true);
+			this._cl_keyDownEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_DOWN).shouldRetain(true);
+			this._cl_keyPressEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.KEY_PRESS).shouldRetain(true);
+			this._cl_enterKeyEvent = new im.UIKeyboardEvent(im.UIKeyboardEvent.ENTER_KEY).shouldRetain(true);
 			
 			//create the event handlers
 			var self = this;

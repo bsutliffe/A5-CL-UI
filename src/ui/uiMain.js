@@ -10,7 +10,7 @@ a5.Package('a5.cl.ui')
 			this.configDefaults({
 				themeURL:null
 			});
-			themeManager = this.create(a5.cl.ui.core.ThemeManager);
+			themeManager = new a5.cl.ui.core.ThemeManager();
 		}
 		
 		self.Override.initializePlugin = function(){

@@ -22,7 +22,7 @@ a5.Package('a5.cl.ui.list')
 				
 		proto.Override.initHandle = function(){
 			//create the clickable handle
-			this._cl_handle = this.create(im.UIControl)
+			this._cl_handle = new im.UIControl()
 				.clickEnabled(true)
 				.usePointer(true)
 				.backgroundColor('#FFF', '#CCC')
@@ -33,15 +33,15 @@ a5.Package('a5.cl.ui.list')
 			
 			var self = this;
 			this._cl_handle.addEventListener(im.UIMouseEvent.CLICK, function(e){
-				self.dispatchEvent(self.create(im.UIEvent, [im.UIEvent.SELECT]));
+				self.dispatchEvent(new im.UIEvent(im.UIEvent.SELECT));
 			});
 			
 			//add the label to the handle
-			this._cl_labelView = this.create(im.UITextField).x(15).width('-15').alignY('middle').nonBreaking(true);
+			this._cl_labelView = new im.UITextField().x(15).width('-15').alignY('middle').nonBreaking(true);
 			this._cl_handle.addSubView(this._cl_labelView);
 			
 			//add the twisty arrow for expandable sections
-			this._cl_arrow = this.create(im.CLHTMLView).width(6).height(6).x(5).alignY('middle');
+			this._cl_arrow = new im.CLHTMLView().width(6).height(6).x(5).alignY('middle');
 			this._cl_handle.addSubView(this._cl_arrow);
 		}
 		

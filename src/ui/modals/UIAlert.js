@@ -44,11 +44,11 @@ a5.Package('a5.cl.ui.modals')
 					.height('auto')
 					.width('100%').maxWidth(300);
 			
-			this._cl_messageField = this.create(im.UITextField).width('100%').height('auto').textAlign('center');
-			this._cl_continueButton = this.create(im.UIButton).label("OK");
-			this._cl_cancelButton = this.create(im.UIButton).label("Cancel");
-			this._cl_buttonHolder = this.create(im.UIContainer).relX(true).width('100%').height('auto').y(15);
-			this._cl_flexSpace = this.create(im.UIFlexSpace);
+			this._cl_messageField = new im.UITextField().width('100%').height('auto').textAlign('center');
+			this._cl_continueButton = new im.UIButton().label("OK");
+			this._cl_cancelButton =new im.UIButton().label("Cancel");
+			this._cl_buttonHolder = new im.UIContainer().relX(true).width('100%').height('auto').y(15);
+			this._cl_flexSpace = new im.UIFlexSpace();
 			
 			this._cl_continueButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eContinueButtonHandler, false, this);
 			this._cl_cancelButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eCancelButtonHandler, false, this);
@@ -60,9 +60,9 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_contentView.addSubView(this._cl_messageField);
 			this._cl_buttonHolder.addSubView(this._cl_flexSpace);
 			this._cl_buttonHolder.addSubView(this._cl_cancelButton);
-			this._cl_buttonHolder.addSubView(this.create(im.UIFlexSpace));
+			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
 			this._cl_buttonHolder.addSubView(this._cl_continueButton);
-			this._cl_buttonHolder.addSubView(this.create(im.UIFlexSpace));
+			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
 			this._cl_contentView.addSubView(this._cl_buttonHolder);
 		}
 		
