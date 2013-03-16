@@ -267,7 +267,7 @@ a5.Package('a5.cl.ui.form')
 					} else {
 						i++;
 						if(i === index){
-							var removed = this._cl_options.options.splice(x, 1)[0];
+							var removed = this._cl_options.splice(x, 1)[0];
 							this._cl_redrawSelect();
 							return removed;
 						}

@@ -4100,7 +4100,7 @@ a5.Package('a5.cl.ui.form')
 				self.selected(this.checked);
 			}
 			//If this is IE < 9, use this nice little hack to make onchange fire immediately
-			if (this.cl()._core().envManager().clientPlatform() === 'IE' && this.cl()._core().envManager().browserVersion() < 9) {
+			if (this.DOM().clientPlatform() === 'IE' && this.DOM().browserVersion() < 9) {
 				var inputOnClick = function(){
 					this.blur();
 					this.focus();
@@ -4389,7 +4389,7 @@ a5.Package('a5.cl.ui.form')
 					} else {
 						i++;
 						if(i === index){
-							var removed = this._cl_options.options.splice(x, 1)[0];
+							var removed = this._cl_options.splice(x, 1)[0];
 							this._cl_redrawSelect();
 							return removed;
 						}
@@ -4746,26 +4746,21 @@ a5.Package('a5.cl.ui.form')
 
 
 a5.Package('a5.cl.ui.form')
+	
+	.Import('a5.cl.ui.events.UIEvent')
 	.Extends('UIFormElement')
 	.Prototype('UIFileInput', function(proto, im, UIFileInput){
 		
 		proto.UIFileInput = function(){
 			proto.superclass(this);
-			
-			this._cl_element = document.createElement('input');
-			this._cl_element.type = 'file';
-			this._cl_element.id = this.instanceUID() + '_field';
-			this._cl_element.style.width = '100%';
+			this._cl_setupInput();
 		}
 		
 		proto.Override.reset = function(){
 			proto.superclass().reset.apply(this, arguments);
 			this._cl_inputView.drawHTML(" ");
 			this._cl_destroyElement(this._cl_element);
-			this._cl_element = document.createElement('input');
-			this._cl_element.type = 'file';
-			this._cl_element.id = this.instanceUID() + '_field';
-			this._cl_element.style.width = '100%';
+			this._cl_setupInput();
 			this._cl_inputView.appendChild(this._cl_element);
 		}
 		
@@ -4777,6 +4772,18 @@ a5.Package('a5.cl.ui.form')
 		proto.Override.value = function(value){
 			if(value === undefined)
 				return this._cl_element.files ? this._cl_element.files[0] : this._cl_element.value;
+		}
+		
+		proto._cl_setupInput = function(){
+			this._cl_element = document.createElement('input');
+			this._cl_element.type = 'file';
+			this._cl_element.id = this.instanceUID() + '_field';
+			this._cl_element.style.width = '100%';
+			
+			var self = this;
+			this._cl_element.onchange = function(){
+				self.dispatchEvent(im.UIEvent.CHANGE);
+			}
 		}
 });
 
@@ -5791,8 +5798,8 @@ a5.Package('a5.cl.ui.modals')
 	.Extends('UILightBox')
 	.Prototype('UIAlert', function(proto, im, UIAlert){
 		
-		UIAlert.open = function(message, onContinue, onCancel){
-			var inst = a5.Create(UIAlert);
+		UIAlert.open = function(message, onContinue, onCancel, buttonClass){
+			var inst = new UIAlert(buttonClass);
 			inst.open(message, onContinue, onCancel);
 			return inst;
 		}
@@ -5801,16 +5808,16 @@ a5.Package('a5.cl.ui.modals')
 			this._cl_onContinue = null;
 			this._cl_onCancel = null;
 			this._cl_message = '';
-			this._cl_callbackScope = null;
-			
+			this._cl_callbackScope = null;			
 			this._cl_messageField = null;
 			this._cl_continueButton = null;
 			this._cl_cancelButton = null;
 			this._cl_buttonHolder = null;
 			this._cl_flexSpace = null;
+			this._cl_contentWrapper = null;
 		});
 		
-		proto.UIAlert = function(){
+		proto.UIAlert = function(buttonClass){
 			proto.superclass(this);
 			this._cl_windowLevel = a5.cl.CLWindowLevel.ALERT;
 			this.userCanClose(false)
@@ -5821,13 +5828,13 @@ a5.Package('a5.cl.ui.modals')
 					.padding(10)
 					.height('auto')
 					.width('100%').maxWidth(300);
-			
+			var btnClass = buttonClass || im.UIButton;		
 			this._cl_messageField = new im.UITextField().width('100%').height('auto').textAlign('center');
-			this._cl_continueButton = new im.UIButton().label("OK");
-			this._cl_cancelButton =new im.UIButton().label("Cancel");
+			this._cl_continueButton = new btnClass().label("OK");
+			this._cl_cancelButton =new btnClass().label("Cancel");
 			this._cl_buttonHolder = new im.UIContainer().relX(true).width('100%').height('auto').y(15);
 			this._cl_flexSpace = new im.UIFlexSpace();
-			
+			this._cl_contentWrapper = new a5.cl.CLViewContainer();
 			this._cl_continueButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eContinueButtonHandler, false, this);
 			this._cl_cancelButton.addEventListener(im.UIMouseEvent.CLICK, this._cl_eCancelButtonHandler, false, this);
 		}
@@ -5836,6 +5843,8 @@ a5.Package('a5.cl.ui.modals')
 			proto.superclass().viewReady.apply(this, arguments);
 			
 			this._cl_contentView.addSubView(this._cl_messageField);
+			this._cl_contentView.addSubView(this._cl_contentWrapper);
+			this._cl_contentWrapper.width('100%').height('auto');
 			this._cl_buttonHolder.addSubView(this._cl_flexSpace);
 			this._cl_buttonHolder.addSubView(this._cl_cancelButton);
 			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
@@ -5864,6 +5873,10 @@ a5.Package('a5.cl.ui.modals')
 				if(this._cl_buttonHolder.containsSubView(this._cl_cancelButton))
 					this._cl_buttonHolder.removeSubView(this._cl_cancelButton);
 			}
+		}
+		
+		proto.contentWrapper = function(){
+			return this._cl_contentWrapper;
 		}
 		
 		proto.message = function(value){

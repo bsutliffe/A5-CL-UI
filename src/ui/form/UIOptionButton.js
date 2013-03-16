@@ -90,7 +90,7 @@ a5.Package('a5.cl.ui.form')
 				self.selected(this.checked);
 			}
 			//If this is IE < 9, use this nice little hack to make onchange fire immediately
-			if (this.cl()._core().envManager().clientPlatform() === 'IE' && this.cl()._core().envManager().browserVersion() < 9) {
+			if (this.DOM().clientPlatform() === 'IE' && this.DOM().browserVersion() < 9) {
 				var inputOnClick = function(){
 					this.blur();
 					this.focus();
