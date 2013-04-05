@@ -1,7 +1,7 @@
 
 a5.Package('a5.cl.ui.form')
 	.Import('a5.cl.core.Utils',
-			'a5.cl.CLEvent')
+			'a5.cl.CLMVCEvent')
 	.Extends('a5.cl.CLViewContainer')
 	.Prototype('UIForm', function(proto, im, UIForm){
 	
@@ -16,8 +16,8 @@ a5.Package('a5.cl.ui.form')
 			this._cl_viewElementType = 'form';
 			proto.superclass(this);
 			
-			this.addEventListener(im.CLEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
-			this.addEventListener(im.CLEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
 		}
 		
 		proto.validate = function(){
@@ -130,13 +130,13 @@ a5.Package('a5.cl.ui.form')
 			if(view instanceof im.UIFormElement) {
 				if (view.includeInParentForm()) {
 					switch (e.type()) {
-						case im.CLEvent.ADDED_TO_PARENT:
+						case im.CLMVCEvent.ADDED_TO_PARENT:
 							view._cl_form = this;
 							view.addOneTimeEventListener(a5.Event.DESTROYED, this._cl_eChildViewHandler, false, this);
 							this._cl_elements.push(view);
 							break;
 						case a5.Event.DESTROYED:
-						case im.CLEvent.REMOVED_FROM_PARENT:
+						case im.CLMVCEvent.REMOVED_FROM_PARENT:
 							index = im.Utils.arrayIndexOf(this._cl_elements, view);
 							if (index > -1) {
 								this._cl_elements.splice(index, 1);
@@ -145,10 +145,10 @@ a5.Package('a5.cl.ui.form')
 							break;
 					}
 				}
-			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
+			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLMVCEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
 				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(new im.CLEvent(im.CLEvent.ADDED_TO_PARENT));
+					view.subViewAtIndex(x).dispatchEvent(new im.CLMVCEvent(im.CLMVCEvent.ADDED_TO_PARENT));
 				}
 			}
 		}

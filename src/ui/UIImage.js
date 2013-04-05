@@ -258,6 +258,7 @@ a5.Package('a5.cl.ui')
 		}
 		
 		proto.dealloc = function(){
+			this._cl_imgElement.onload = this._cl_imgElement.onerror = null;
 			this._cl_destroyElement(this._cl_imgElement);
 			this._cl_imgElement = null;
 		}
