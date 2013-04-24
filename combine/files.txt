@@ -12,6 +12,8 @@ src/ui/interfaces/ITabView.js
 src/ui/mixins/UIGroupable.js
 src/ui/mixins/UIInteractable.js
 src/ui/mixins/UIThemable.js
+src/ui/mixins/UIDraggable.js
+src/ui/mixins/UIDroppable.js
 src/ui/mixins/UIKeyboardEventDispatcher.js
 src/ui/UIControl.js
 src/ui/UIHTMLControl.js
