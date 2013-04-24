@@ -16,6 +16,7 @@ a5.Package('a5.cl.ui.form')
 		
 		this.Properties(function(){
 			this._cl_element = null;
+			this._cl_referencedElem = null;
 			this._cl_multiline = false;
 			this._cl_defaultValue = '';
 			this._cl_textColor = '#000';
@@ -32,8 +33,12 @@ a5.Package('a5.cl.ui.form')
 			this._cl_textAlign = 'left';
 		})
 		
-		proto.UIInputField = function(text){
+		proto.UIInputField = function(text, referencedElem){
 			proto.superclass(this);
+			if(referencedElem){
+				var newElem = typeof referencedElem == 'string' ? document.getElementById(referencedElem) : referencedElem;	
+				this._cl_referencedElem = newElem;
+			}
 			this.multiline(false, true); //creates the input element			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			this.height('auto').relX(true);
@@ -148,16 +153,17 @@ a5.Package('a5.cl.ui.form')
 				var previousValue = this._cl_element ? this._cl_element.value : '';
 				this.inputView().clearHTML();
 				if(value){
-					this._cl_element = document.createElement('textarea');
+					this._cl_element = this._cl_referencedElem || document.createElement('textarea');
 					this._cl_element.style.resize = 'none';
 					this.inputView().height('100%');
 				} else {
 					this.inputView().clearHTML();
-					this._cl_element = document.createElement('input');
+					this._cl_element = this._cl_referencedElem || document.createElement('input');
 					this._cl_element.type = this._cl_password ? 'password' : 'text';
 					this.inputView().height(22);
 				}
-				this._cl_element.id = this.instanceUID() + '_field';
+				if(!this._cl_referencedElem)
+					this._cl_element.id = this.instanceUID() + '_field';
 				this._cl_element.style.width = this._cl_element.style.height = '100%';
 				this._cl_element.style.padding = this._cl_element.style.margin = '0px';
 				this._cl_element.style.border = 'none';
@@ -167,7 +173,8 @@ a5.Package('a5.cl.ui.form')
 				this._cl_addFocusEvents(this._cl_element);
 				this.keyboardEventTarget(this._cl_element);
 				this.inputView().appendChild(this._cl_element);
-				this._cl_element.value = previousValue;
+				if(!this._cl_referencedElem)
+					this._cl_element.value = previousValue;
 				return this;
 			}
 			return this._cl_multiline;

@@ -15,6 +15,10 @@ a5.Package('a5.cl.ui')
 	.Import('a5.cl.*',
 			'a5.cl.core.Utils')
 	.Extends('UIHTMLControl')
+	.Static(function(UIImage){
+		
+		UIImage.ignoreErrors = false;
+	})
 	.Prototype('UIImage', function(proto, im, UIImage){
 		
 		this.Properties(function(){
@@ -49,6 +53,10 @@ a5.Package('a5.cl.ui')
 		
 		proto._cl_applySrc = function(){
 			var self = this,
+				didRetry = false,
+				applySrc = function(){
+					self._cl_imgElement.src = self._cl_src !== null && self._cl_src !== "" ? (self.isBase64() ? self._cl_src: im.Utils.makeAbsolutePath(self._cl_src)) : null;
+				},
 				onLoad = function(){
 					self._cl_nativeWidth = self._cl_imgElement.naturalWidth || self._cl_imgElement.width;
 					self._cl_nativeHeight = self._cl_imgElement.naturalHeight || self._cl_imgElement.height;
@@ -60,8 +68,15 @@ a5.Package('a5.cl.ui')
 					self.redraw();
 				},
 				onError = function(e){
-					self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
-					self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+					if (!didRetry) {
+						didRetry = true;
+						applySrc();
+					} else {
+						if (!UIImage.ignoreErrors) {
+							self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
+							self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+						}
+					}
 				};
 			this._cl_imgLoaded = false;
 			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
@@ -77,7 +92,7 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
+				applySrc();
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
 			}

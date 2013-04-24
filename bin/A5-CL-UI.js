@@ -58,7 +58,7 @@ a5.Package('a5.cl.ui.core')
 			if(context instanceof a5.cl.CLView)
 				context = context._cl_viewElement;
 			else
-				context = a5.cl.instance().application().view();
+				context = a5.cl.Instance().MVC().application().view();
 			
 			var obj = elem,
 				topVal = 0,
@@ -1044,7 +1044,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIControl = function(){
 			proto.superclass(this);
-			this.usePointer(false)
+			this.usePointer(false);
 			this.width('auto').height('auto');
 		}
 		
@@ -1162,6 +1162,10 @@ a5.Package('a5.cl.ui')
 	.Import('a5.cl.*',
 			'a5.cl.core.Utils')
 	.Extends('UIHTMLControl')
+	.Static(function(UIImage){
+		
+		UIImage.ignoreErrors = false;
+	})
 	.Prototype('UIImage', function(proto, im, UIImage){
 		
 		this.Properties(function(){
@@ -1196,6 +1200,10 @@ a5.Package('a5.cl.ui')
 		
 		proto._cl_applySrc = function(){
 			var self = this,
+				didRetry = false,
+				applySrc = function(){
+					self._cl_imgElement.src = self._cl_src !== null && self._cl_src !== "" ? (self.isBase64() ? self._cl_src: im.Utils.makeAbsolutePath(self._cl_src)) : null;
+				},
 				onLoad = function(){
 					self._cl_nativeWidth = self._cl_imgElement.naturalWidth || self._cl_imgElement.width;
 					self._cl_nativeHeight = self._cl_imgElement.naturalHeight || self._cl_imgElement.height;
@@ -1207,8 +1215,15 @@ a5.Package('a5.cl.ui')
 					self.redraw();
 				},
 				onError = function(e){
-					self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
-					self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+					if (!didRetry) {
+						didRetry = true;
+						applySrc();
+					} else {
+						if (!UIImage.ignoreErrors) {
+							self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
+							self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+						}
+					}
 				};
 			this._cl_imgLoaded = false;
 			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
@@ -1224,7 +1239,7 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
+				applySrc();
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
 			}
@@ -3602,6 +3617,7 @@ a5.Package('a5.cl.ui.form')
 		
 		this.Properties(function(){
 			this._cl_element = null;
+			this._cl_referencedElem = null;
 			this._cl_multiline = false;
 			this._cl_defaultValue = '';
 			this._cl_textColor = '#000';
@@ -3618,8 +3634,12 @@ a5.Package('a5.cl.ui.form')
 			this._cl_textAlign = 'left';
 		})
 		
-		proto.UIInputField = function(text){
+		proto.UIInputField = function(text, referencedElem){
 			proto.superclass(this);
+			if(referencedElem){
+				var newElem = typeof referencedElem == 'string' ? document.getElementById(referencedElem) : referencedElem;	
+				this._cl_referencedElem = newElem;
+			}
 			this.multiline(false, true); //creates the input element			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			this.height('auto').relX(true);
@@ -3734,16 +3754,17 @@ a5.Package('a5.cl.ui.form')
 				var previousValue = this._cl_element ? this._cl_element.value : '';
 				this.inputView().clearHTML();
 				if(value){
-					this._cl_element = document.createElement('textarea');
+					this._cl_element = this._cl_referencedElem || document.createElement('textarea');
 					this._cl_element.style.resize = 'none';
 					this.inputView().height('100%');
 				} else {
 					this.inputView().clearHTML();
-					this._cl_element = document.createElement('input');
+					this._cl_element = this._cl_referencedElem || document.createElement('input');
 					this._cl_element.type = this._cl_password ? 'password' : 'text';
 					this.inputView().height(22);
 				}
-				this._cl_element.id = this.instanceUID() + '_field';
+				if(!this._cl_referencedElem)
+					this._cl_element.id = this.instanceUID() + '_field';
 				this._cl_element.style.width = this._cl_element.style.height = '100%';
 				this._cl_element.style.padding = this._cl_element.style.margin = '0px';
 				this._cl_element.style.border = 'none';
@@ -3753,7 +3774,8 @@ a5.Package('a5.cl.ui.form')
 				this._cl_addFocusEvents(this._cl_element);
 				this.keyboardEventTarget(this._cl_element);
 				this.inputView().appendChild(this._cl_element);
-				this._cl_element.value = previousValue;
+				if(!this._cl_referencedElem)
+					this._cl_element.value = previousValue;
 				return this;
 			}
 			return this._cl_multiline;
@@ -4956,7 +4978,7 @@ a5.Package('a5.cl.ui.form')
 		
 		cls._cl_updateSelectedDisplay = function(){
 			if(this._cl_dateValue)
-				this._cl_element.value(this._cl_dateValue.toLocaleFormat());
+				this._cl_element.value(this._cl_dateValue.toLocaleString());
 			else
 				this._cl_element.value("");
 		}
@@ -5011,6 +5033,30 @@ a5.Package('a5.cl.ui.form')
 				}
 			}
 			return invalid.length === 0 ? true : invalid;
+		}
+		
+		proto.formTarget = function(url){
+			var iframe = document.createElement('iframe'),
+				targetID = this.instanceUID() + '_ifrTarget';
+			iframe.src = url;
+			iframe.style.display = 'none';
+			iframe.name = targetID;
+			this._cl_parentView._cl_viewElement.insertBefore(iframe, this._cl_viewElement);
+			this._cl_viewElement.action = url;
+			this._cl_viewElement.method = "post";
+			this._cl_viewElement.name = this.instanceUID() + "_formName";
+			this._cl_viewElement.target = targetID; 
+			var submitBtn = document.createElement('input');
+			submitBtn.type = 'submit';
+			submitBtn.style.display = 'none';
+			submitBtn.id = this.instanceUID() + "_formSubmit";
+			this._cl_viewElement.appendChild(submitBtn);
+			
+		}
+		
+		proto.submitFormTarget = function(){
+			document.getElementById(this.instanceUID() + "_formSubmit").click();
+			//this._cl_viewElement.submit();
 		}
 		
 		proto.getData = function(){

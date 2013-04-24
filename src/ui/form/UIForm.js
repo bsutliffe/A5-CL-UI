@@ -35,6 +35,30 @@ a5.Package('a5.cl.ui.form')
 			return invalid.length === 0 ? true : invalid;
 		}
 		
+		proto.formTarget = function(url){
+			var iframe = document.createElement('iframe'),
+				targetID = this.instanceUID() + '_ifrTarget';
+			iframe.src = url;
+			iframe.style.display = 'none';
+			iframe.name = targetID;
+			this._cl_parentView._cl_viewElement.insertBefore(iframe, this._cl_viewElement);
+			this._cl_viewElement.action = url;
+			this._cl_viewElement.method = "post";
+			this._cl_viewElement.name = this.instanceUID() + "_formName";
+			this._cl_viewElement.target = targetID; 
+			var submitBtn = document.createElement('input');
+			submitBtn.type = 'submit';
+			submitBtn.style.display = 'none';
+			submitBtn.id = this.instanceUID() + "_formSubmit";
+			this._cl_viewElement.appendChild(submitBtn);
+			
+		}
+		
+		proto.submitFormTarget = function(){
+			document.getElementById(this.instanceUID() + "_formSubmit").click();
+			//this._cl_viewElement.submit();
+		}
+		
 		proto.getData = function(){
 			var data = {},
 				x, y, thisElem, optGroup;
