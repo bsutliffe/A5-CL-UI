@@ -145,8 +145,22 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto._cl_eChildViewHandler = function(e){
-			var view = e.target(), 
-				index = -1;
+			var view = e.target(),
+				self = this, 
+				index = -1,
+				checkChildren = function(viewContainer){
+					for(var i = 0, l = viewContainer.subViewCount(); i<l; i++){
+						var view = viewContainer.subViewAtIndex(i);		
+						if (view instanceof im.UIFormElement && view.includeInParentForm()) {
+							view._cl_form = self;
+							view.addOneTimeEventListener(a5.Event.DESTROYED, self._cl_eChildViewHandler, false, self);
+							self._cl_elements.push(view);
+						} else if (view instanceof a5.cl.CLViewContainer) {
+							checkChildren(view);
+						}
+					}
+				}
+			
 			if(view instanceof UIForm && view !== this){
 				this.throwError("UIForms cannot be nested within other UIForms.  Consider a different view structure.");
 				return;
@@ -171,9 +185,7 @@ a5.Package('a5.cl.ui.form')
 				}
 			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLMVCEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
-				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(new im.CLMVCEvent(im.CLMVCEvent.ADDED_TO_PARENT));
-				}
+				checkChildren(view);
 			}
 		}
 });
