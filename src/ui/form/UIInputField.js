@@ -24,6 +24,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_password = false;
 			this._cl_imitateLabel = false;
 			this._cl_historyEnabled = false;
+			this._cl_readOnly = false;
 			this._cl_dataStore = null;
 			this._cl_history = null;
 			this._cl_userEnteredValue = "";
@@ -187,6 +188,15 @@ a5.Package('a5.cl.ui.form')
 				return this;
 			}
 			return this._cl_enabled;
+		}
+		
+		proto.readOnly = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_readOnly = value;
+				this._cl_element.readOnly = value;
+				return this;
+			}
+			return this._cl_readOnly;
 		}
 		
 		proto.historyEnabled = function(value){

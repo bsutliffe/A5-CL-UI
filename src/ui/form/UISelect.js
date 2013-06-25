@@ -73,7 +73,7 @@ a5.Package('a5.cl.ui.form')
 					opt = document.createElement('option');
 					opt.innerHTML = item.label;
 					opt.value = item.value + '';
-					opt.title = item.title + '';
+					opt.title = (item.title || item.label) + '';
 				}
 				//add the item to the select
 				sel.appendChild(opt);

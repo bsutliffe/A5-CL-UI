@@ -30,7 +30,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarView = new im.CLViewContainer();
 			this._cl_tabBarBG = new im.CLViewContainer();
 			this._cl_tabBarWrapper = new im.CLViewContainer();
-			this._cl_contentView = new a5.cl.ui.UIFlexSpace();
+			this._cl_contentView = new im.CLViewContainer();
 			
 			this._cl_tabBarWrapper.height(25);
 			this._cl_tabBarView.relX(true);
@@ -45,6 +45,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarWrapper.addSubView(this._cl_tabBarView);
 			this.view().addSubView(this._cl_tabBarWrapper);
 			this.view().addSubView(this._cl_contentView);
+			this.view().constrainChildren(true);
 			this._cl_viewReady();
 			/*
 			var self = this;
@@ -174,6 +175,12 @@ a5.Package('a5.cl.ui.controllers')
 			dyingTab.tabView.removeEventListener(im.UIMouseEvent.CLICK, this._cl_eTabClickHandler);
 			this._cl_contentView.removeSubView(dyingTab.contentView, destroy !== false);
 			this._cl_tabBarView.removeSubView(dyingTab.tabView, destroy !== false);
+			for(var x = 0, y = this._cl_tabs.length; x < y; x++){
+				var thisTab = this._cl_tabs[x].tabView;
+				thisTab.width(thisTab.staticWidth() ? thisTab.staticWidth() :(100 / this._cl_tabs.length) + '%');
+			}
+			if (index < this._cl_activeTab)
+			    this._cl_activeTab--;
 			return destroy === false ? dyingTab : null;
 		}
 		
@@ -204,7 +211,7 @@ a5.Package('a5.cl.ui.controllers')
 				var thisTab = this._cl_tabs[x];
 				var isActive = x === index;
 				thisTab.contentView.visible(isActive);
-				thisTab.contentView.suspendRedraws(!isActive);
+				//thisTab.contentView.suspendRedraws(!isActive);
 				if (isActive) {
 					thisTab.tabView.activated();
 					this._cl_activeTab = x;
