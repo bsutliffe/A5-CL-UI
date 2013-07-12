@@ -17,6 +17,7 @@ a5.Package('a5.cl.ui.form')
 				.inputViewWidth(25)
 				.labelViewWidth('auto')
 				.relX(true);
+			this._cl_labelView.y(4);
 		}
 		
 		proto.Override.viewReady = function(){

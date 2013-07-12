@@ -130,7 +130,7 @@ a5.Package('a5.cl.ui.form')
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value, null, opt.title);
+						this.addOption(opt.label, opt.value, null, opt.title, true);
 				}
 			}
 		}
@@ -143,11 +143,12 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [group]	The label of the group that this option should be added to.
 		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group, title){
+		proto.addOption = function(label, value, group, title, skipRedraw){
 			//call the internal method
 			this._cl_addOptionAtIndex(label, value, -1, group, title);
 			//redraw the select
-			this._cl_redrawSelect();
+			if(!skipRedraw)
+				this._cl_redrawSelect();
 		}
 		
 		/**

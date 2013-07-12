@@ -913,23 +913,35 @@ a5.Package('a5.cl.ui.mixins')
 
 a5.Package('a5.cl.ui.mixins')
 	
-	.Import('a5.cl.initializers.dom.Utils')
+	.Import('a5.PropertyMutatorAttribute',
+			'a5.cl.initializers.dom.Utils')
 	.Mixin('UIDraggable', function(proto, im){
 		
 		this.Properties(function(){
 			this._clui_dragData = null;
 			this._clui_dropTargets = [];
+			this._clui_dragActive = true;
 		})
 		
 		proto.UIDraggable = function(){
 		}
 		
+		proto.dragActive = function(val){
+			if (val !== undefined) {
+				this._clui_dragActive = val;
+				return this;
+			}
+			return this._clui_dragActive;
+		}
+		
 		proto.mixinReady = function(){
-			this._cl_viewElement.draggable = 'true';
-			var self = this;
-			im.Utils.addEventListener(this._cl_viewElement, 'ondragstart', function(e){
-				e.dataTransfer.setData("instanceUID", self.instanceUID());
-			});
+			if (this._clui_dragActive) {
+				this._cl_viewElement.draggable = 'true';
+				var self = this;
+				im.Utils.addEventListener(this._cl_viewElement, 'ondragstart', function(e){
+					e.dataTransfer.setData("instanceUID", self.instanceUID());
+				});
+			}
 		}
 		
 		proto.dragData = function(value){
@@ -949,35 +961,48 @@ a5.Package('a5.cl.ui.mixins')
 
 a5.Package('a5.cl.ui.mixins')
 	
-	.Import('a5.cl.initializers.dom.Utils')
+	.Import('a5.PropertyMutatorAttribute',
+			'a5.cl.initializers.dom.Utils')
 	.Mixin('UIDroppable', function(proto, im){
 		
 		this.Properties(function(){
 			this._clui_dropHandler = null;
+			this._clui_dropActive = true;
 		})
 		
 		proto.UIDroppable = function(){
 		}	
 		
+		proto.dropActive = function(val){
+			if (val !== undefined) {
+				this._clui_dropActive = val;
+				return this;
+			}
+			return this._clui_dropActive;
+		}
+		
 		proto.mixinReady = function(){	
-			var self = this;
-			im.Utils.addEventListener(this._cl_viewElement, 'ondragover', function(e){ e.preventDefault(); });
-			im.Utils.addEventListener(this._cl_viewElement, 'ondrop', function(e){
-				var ref = document.getElementById(e.dataTransfer.getData("instanceUID")).a5Ref,
-					isValid = false;
-				if (!ref._clui_dropTargets.length) {
-					isValid = true;
-				} else {
-					for (var i = 0, l = ref._clui_dropTargets.length; i < l; i++) {
-						if(self.doesExtend(ref._clui_dropTargets[i]) || self instanceof ref._clui_dropTargets[i])
-							isValid = true;
+			if (this._clui_dropActive) {
+				var self = this;
+				im.Utils.addEventListener(this._cl_viewElement, 'ondragover', function(e){
+					e.preventDefault();
+				});
+				im.Utils.addEventListener(this._cl_viewElement, 'ondrop', function(e){
+					var ref = document.getElementById(e.dataTransfer.getData("instanceUID")).a5Ref, isValid = false;
+					if (!ref._clui_dropTargets.length) {
+						isValid = true;
+					} else {
+						for (var i = 0, l = ref._clui_dropTargets.length; i < l; i++) {
+							if (self.doesExtend(ref._clui_dropTargets[i]) || self instanceof ref._clui_dropTargets[i]) 
+								isValid = true;
 							break;
+						}
 					}
-				}
-				if (isValid && self._clui_dropHandler) {
-					self._clui_dropHandler.call(self, ref);
-				}
-			});		
+					if (isValid && self._clui_dropHandler) {
+						self._clui_dropHandler.call(self, ref);
+					}
+				});
+			}
 		}	
 		
 		proto.setDropHandler = function(handler){
@@ -1820,7 +1845,9 @@ a5.Package('a5.cl.ui')
 				value = elem.innerHTML;
 				elem = null;
 			}
+			this._cl_iframeDoc.open('text/html', 'replace');
 			this._cl_iframeDoc.write(value);
+			this._cl_iframeDoc.close();
 		}
 		
 		proto.sandboxSettings = function(){
@@ -4139,15 +4166,20 @@ a5.Package('a5.cl.ui.form')
 	.Extends('UIFormElement')
 	.Mix('a5.cl.ui.mixins.UIGroupable')
 	.Prototype('UIOptionButton', function(proto, im){
-		proto.UIOptionButton = function(type){
+		proto.UIOptionButton = function(type, label, group){
 			proto.superclass(this);
 			this._cl_value = null;
 			this._cl_defaultValue = null;
 			this._cl_input = this._cl_createInput((type === 'radio') ? 'radio' : 'checkbox');
+			if(label)
+				this.label(label);
+			if(group)
+				this.optionGroup(group);
 			this.height('auto')
 				.inputViewWidth(25)
 				.labelViewWidth('auto')
 				.relX(true);
+			this._cl_labelView.y(4);
 		}
 		
 		proto.Override.viewReady = function(){
@@ -4377,7 +4409,7 @@ a5.Package('a5.cl.ui.form')
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value, null, opt.title);
+						this.addOption(opt.label, opt.value, null, opt.title, true);
 				}
 			}
 		}
@@ -4390,11 +4422,12 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [group]	The label of the group that this option should be added to.
 		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group, title){
+		proto.addOption = function(label, value, group, title, skipRedraw){
 			//call the internal method
 			this._cl_addOptionAtIndex(label, value, -1, group, title);
 			//redraw the select
-			this._cl_redrawSelect();
+			if(!skipRedraw)
+				this._cl_redrawSelect();
 		}
 		
 		/**
