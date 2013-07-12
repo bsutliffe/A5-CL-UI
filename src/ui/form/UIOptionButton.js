@@ -13,7 +13,7 @@ a5.Package('a5.cl.ui.form')
 				this.label(label);
 			if(group)
 				this.optionGroup(group);
-			this.height('auto')
+			this.height('auto').width('auto')
 				.inputViewWidth(25)
 				.labelViewWidth('auto')
 				.relX(true);
