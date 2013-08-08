@@ -5343,7 +5343,7 @@ a5.Package('a5.cl.ui.buttons')
 		UIButton.themeDefaults = {
 			//width:100,
 			//height:25,
-			padding:{left:5, right:5},
+			padding:5,
 			backgroundColor:['#FFF', '#CCC'],
 			border:[1, 'solid', '#AAA', 5],
 			_states_:{
@@ -5569,7 +5569,12 @@ a5.Package('a5.cl.ui.buttons')
 
 a5.Package('a5.cl.ui.modals')
 	.Extends('a5.cl.CLWindow')
-	.Prototype('UIModal', function(proto, im){
+	.Static(function(UIModal){
+		
+		UIModal.CLOSE = 'uiModalClose';
+		
+	})
+	.Prototype('UIModal', function(proto, im, UIModal){
 		
 		this.Properties(function(){
 			this._cl_destroyOnClose = true;
@@ -5589,8 +5594,10 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.close = function(){
-			if(this.isOpen())
+			if (this.isOpen()) {
+				this.dispatchEvent(UIModal.CLOSE);
 				this.MVC().application().removeWindow(this, this._cl_destroyOnClose);
+			}
 		}
 		
 		proto.Override.hide = function(){

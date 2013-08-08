@@ -15,7 +15,7 @@ a5.Package('a5.cl.ui.buttons')
 		UIButton.themeDefaults = {
 			//width:100,
 			//height:25,
-			padding:{left:5, right:5},
+			padding:5,
 			backgroundColor:['#FFF', '#CCC'],
 			border:[1, 'solid', '#AAA', 5],
 			_states_:{
