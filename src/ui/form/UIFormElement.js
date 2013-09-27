@@ -317,6 +317,10 @@ a5.Package('a5.cl.ui.form')
 			this.element().blur();
 		}
 		
+		proto.hasFocus = function(){
+			return document.activeElement === this.element();
+		}
+		
 		/*proto.width = function(value){
 			var returnVal = proto.superclass().width.call(this, value);
 			if(value === 'scroll' || value === 'content'){
