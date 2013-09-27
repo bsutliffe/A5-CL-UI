@@ -51,7 +51,7 @@ a5.Package('a5.cl.ui.modals')
 			});
 		}
 		
-		self.viewReady = function(){
+		self.Override.viewReady = function(){
 			self.superclass().viewReady.apply(this, arguments);
 			
 			this.relY(true)

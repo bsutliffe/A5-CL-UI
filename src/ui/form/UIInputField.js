@@ -30,6 +30,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_minLength = 0;
 			this._cl_maxLength = Infinity;
 			this._cl_textAlign = 'left';
+			this._cl_changeEventBlocked = false;
 		})
 		
 		proto.UIInputField = function(text){
@@ -51,9 +52,10 @@ a5.Package('a5.cl.ui.form')
 			//add the input element to the html view
 			this.inputView().htmlWrapper().appendChild(this._cl_element);
 			var self = this;
-			this._cl_element.onchange = function(){
-				self.dispatchEvent(self._cl_changeEvent);
-			}
+			a5.cl.initializers.dom.Utils.addEventListener(this._cl_element, 'change', function(){
+				if(!self._cl_changeEventBlocked)
+					self.dispatchEvent(self._cl_changeEvent);
+			});
 		}
 		
 		proto.useHistory = function(value){
@@ -111,9 +113,19 @@ a5.Package('a5.cl.ui.form')
 		 * 
 		 * @param {String} [value]
 		 */
-		proto.Override.value = function(value){
+		proto.Override.value = function(value, blockChangeEvent){
 			if(value !== undefined && value !== null){
 				value = value + ''; //force to a string
+				if (blockChangeEvent) {
+					this._cl_changeEventBlocked = true;
+					var self = this,
+						valCheck = setInterval(function(){
+						if (self._cl_element.value == value) {
+							clearInterval(valCheck);
+							self._cl_changeEventBlocked = false;
+						}
+					}, 50);
+				}
 				this._cl_element.value = value;
 				this._cl_element.setAttribute('value', value);
 				if(this._cl_imitateLabel)
