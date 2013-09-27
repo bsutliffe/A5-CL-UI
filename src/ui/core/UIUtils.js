@@ -33,7 +33,7 @@ a5.Package('a5.cl.ui.core')
 			if(context instanceof a5.cl.CLView)
 				context = context._cl_viewElement;
 			else
-				context = a5.cl.instance().application().view();
+				context = a5.cl.Instance().MVC().application().view();
 			
 			var obj = elem,
 				topVal = 0,

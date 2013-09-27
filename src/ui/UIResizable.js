@@ -6,7 +6,7 @@
  */
 a5.Package('a5.cl.ui')
 	.Import('a5.cl.ui.events.*',
-			'a5.cl.core.Utils')
+			'a5.cl.initializers.dom.Utils')
 	.Extends('UIControl')
 	.Prototype('UIResizable', function(proto, im){
 		
@@ -96,7 +96,7 @@ a5.Package('a5.cl.ui')
 						var allCoords = ['n', 's', 'e', 'w', 'ne', 'se', 'sw', 'nw'];
 						for (var x = 0, y = allCoords.length; x < y; x++) {
 							var thisCoord = allCoords[x];
-							if (im.Utils.arrayIndexOf(coords, thisCoord) === -1) 
+							if (a5.cl.core.Utils.arrayIndexOf(coords, thisCoord) === -1) 
 								this.disableCoordinate(thisCoord);
 							else this.enableCoordinate(thisCoord);
 						}

@@ -165,7 +165,7 @@ a5.Package('a5.cl.ui.form')
 		
 		cls._cl_updateSelectedDisplay = function(){
 			if(this._cl_dateValue)
-				this._cl_element.value(this._cl_dateValue.toLocaleFormat());
+				this._cl_element.value(this._cl_dateValue.toLocaleString());
 			else
 				this._cl_element.value("");
 		}

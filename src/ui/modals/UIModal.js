@@ -1,7 +1,12 @@
 
 a5.Package('a5.cl.ui.modals')
 	.Extends('a5.cl.CLWindow')
-	.Prototype('UIModal', function(proto, im){
+	.Static(function(UIModal){
+		
+		UIModal.CLOSE = 'uiModalClose';
+		
+	})
+	.Prototype('UIModal', function(proto, im, UIModal){
 		
 		this.Properties(function(){
 			this._cl_destroyOnClose = true;
@@ -21,8 +26,10 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.close = function(){
-			if(this.isOpen())
+			if (this.isOpen()) {
+				this.dispatchEvent(UIModal.CLOSE);
 				this.MVC().application().removeWindow(this, this._cl_destroyOnClose);
+			}
 		}
 		
 		proto.Override.hide = function(){

@@ -4,15 +4,20 @@ a5.Package('a5.cl.ui.form')
 	.Extends('UIFormElement')
 	.Mix('a5.cl.ui.mixins.UIGroupable')
 	.Prototype('UIOptionButton', function(proto, im){
-		proto.UIOptionButton = function(type){
+		proto.UIOptionButton = function(type, label, group){
 			proto.superclass(this);
 			this._cl_value = null;
 			this._cl_defaultValue = null;
 			this._cl_input = this._cl_createInput((type === 'radio') ? 'radio' : 'checkbox');
-			this.height('auto')
+			if(label)
+				this.label(label);
+			if(group)
+				this.optionGroup(group);
+			this.height('auto').width('auto')
 				.inputViewWidth(25)
 				.labelViewWidth('auto')
 				.relX(true);
+			this._cl_labelView.y(4);
 		}
 		
 		proto.Override.viewReady = function(){

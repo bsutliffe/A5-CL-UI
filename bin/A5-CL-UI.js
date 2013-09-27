@@ -58,7 +58,7 @@ a5.Package('a5.cl.ui.core')
 			if(context instanceof a5.cl.CLView)
 				context = context._cl_viewElement;
 			else
-				context = a5.cl.instance().application().view();
+				context = a5.cl.Instance().MVC().application().view();
 			
 			var obj = elem,
 				topVal = 0,
@@ -912,6 +912,106 @@ a5.Package('a5.cl.ui.mixins')
 
 
 a5.Package('a5.cl.ui.mixins')
+	
+	.Import('a5.PropertyMutatorAttribute',
+			'a5.cl.initializers.dom.Utils')
+	.Mixin('UIDraggable', function(proto, im){
+		
+		this.Properties(function(){
+			this._clui_dragData = null;
+			this._clui_dropTargets = [];
+			this._clui_dragActive = true;
+		})
+		
+		proto.UIDraggable = function(){
+		}
+		
+		proto.dragActive = function(val){
+			if (val !== undefined) {
+				this._clui_dragActive = val;
+				return this;
+			}
+			return this._clui_dragActive;
+		}
+		
+		proto.mixinReady = function(){
+			if (this._clui_dragActive) {
+				this._cl_viewElement.draggable = 'true';
+				var self = this;
+				im.Utils.addEventListener(this._cl_viewElement, 'ondragstart', function(e){
+					e.dataTransfer.setData("instanceUID", self.instanceUID());
+				});
+			}
+		}
+		
+		proto.dragData = function(value){
+			if(value)
+				this._clui_dragData = value;
+			return this._clui_dragData;
+		}
+		
+		proto.addDropTarget = function(target){
+			if(!target.doesMix(im.UIDroppable))
+				throw 'targets passed to addDropTarget on UIDraggable must mix UIDroppable.';
+			else
+				this._clui_dropTargets.push(target);
+		}
+});
+
+
+a5.Package('a5.cl.ui.mixins')
+	
+	.Import('a5.PropertyMutatorAttribute',
+			'a5.cl.initializers.dom.Utils')
+	.Mixin('UIDroppable', function(proto, im){
+		
+		this.Properties(function(){
+			this._clui_dropHandler = null;
+			this._clui_dropActive = true;
+		})
+		
+		proto.UIDroppable = function(){
+		}	
+		
+		proto.dropActive = function(val){
+			if (val !== undefined) {
+				this._clui_dropActive = val;
+				return this;
+			}
+			return this._clui_dropActive;
+		}
+		
+		proto.mixinReady = function(){	
+			if (this._clui_dropActive) {
+				var self = this;
+				im.Utils.addEventListener(this._cl_viewElement, 'ondragover', function(e){
+					e.preventDefault();
+				});
+				im.Utils.addEventListener(this._cl_viewElement, 'ondrop', function(e){
+					var ref = document.getElementById(e.dataTransfer.getData("instanceUID")).a5Ref, isValid = false;
+					if (!ref._clui_dropTargets.length) {
+						isValid = true;
+					} else {
+						for (var i = 0, l = ref._clui_dropTargets.length; i < l; i++) {
+							if (self.doesExtend(ref._clui_dropTargets[i]) || self instanceof ref._clui_dropTargets[i]) 
+								isValid = true;
+							break;
+						}
+					}
+					if (isValid && self._clui_dropHandler) {
+						self._clui_dropHandler.call(self, ref);
+					}
+				});
+			}
+		}	
+		
+		proto.setDropHandler = function(handler){
+			this._clui_dropHandler = handler;
+		}	
+});
+
+
+a5.Package('a5.cl.ui.mixins')
 	.Import('a5.cl.ui.events.UIKeyboardEvent',
 			'a5.cl.initializers.dom.Utils')
 	.Mixin('UIKeyboardEventDispatcher', function(proto, im){
@@ -1044,7 +1144,7 @@ a5.Package('a5.cl.ui')
 		
 		proto.UIControl = function(){
 			proto.superclass(this);
-			this.usePointer(false)
+			this.usePointer(false);
 			this.width('auto').height('auto');
 		}
 		
@@ -1162,6 +1262,10 @@ a5.Package('a5.cl.ui')
 	.Import('a5.cl.*',
 			'a5.cl.core.Utils')
 	.Extends('UIHTMLControl')
+	.Static(function(UIImage){
+		
+		UIImage.ignoreErrors = false;
+	})
 	.Prototype('UIImage', function(proto, im, UIImage){
 		
 		this.Properties(function(){
@@ -1196,6 +1300,10 @@ a5.Package('a5.cl.ui')
 		
 		proto._cl_applySrc = function(){
 			var self = this,
+				didRetry = false,
+				applySrc = function(){
+					self._cl_imgElement.src = self._cl_src !== null && self._cl_src !== "" ? (self.isBase64() ? self._cl_src: im.Utils.makeAbsolutePath(self._cl_src)) : null;
+				},
 				onLoad = function(){
 					self._cl_nativeWidth = self._cl_imgElement.naturalWidth || self._cl_imgElement.width;
 					self._cl_nativeHeight = self._cl_imgElement.naturalHeight || self._cl_imgElement.height;
@@ -1207,8 +1315,15 @@ a5.Package('a5.cl.ui')
 					self.redraw();
 				},
 				onError = function(e){
-					self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
-					self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+					if (!didRetry) {
+						didRetry = true;
+						applySrc();
+					} else {
+						if (!UIImage.ignoreErrors) {
+							self.MVC().redirect(500, "UIImage Error: Error loading image at url " + self._cl_src);
+							self._cl_imgElement.onload = self._cl_imgElement.onerror = null;
+						}
+					}
 				};
 			this._cl_imgLoaded = false;
 			this._cl_imgElement.style.width = this._cl_imgElement.style.height = null; 
@@ -1224,7 +1339,7 @@ a5.Package('a5.cl.ui')
 				this._cl_imgElement.style.position = 'relative';
 				this._cl_imgElement.onload = onLoad;
 				this._cl_imgElement.onerror = onError;
-				this._cl_imgElement.src = this._cl_src !== null && this._cl_src !== "" ? (this.isBase64() ? this._cl_src: im.Utils.makeAbsolutePath(this._cl_src)) : null;
+				applySrc();
 			} else {
 				this._cl_css('backgroundImage', "url('" + this._cl_src + "')");
 			}
@@ -1405,6 +1520,7 @@ a5.Package('a5.cl.ui')
 		}
 		
 		proto.dealloc = function(){
+			this._cl_imgElement.onload = this._cl_imgElement.onerror = null;
 			this._cl_destroyElement(this._cl_imgElement);
 			this._cl_imgElement = null;
 		}
@@ -1666,16 +1782,20 @@ a5.Package('a5.cl.ui')
 	.Extends('UIHTMLControl')
 	.Static(function(UIFrameView){
 		
+		UIFrameView.READY = 'uiFrameViewReady';
+		
 		UIFrameView.ALLOW_SAME_ORIGIN = "allow-same-origin";
 		
 		UIFrameView.ALLOW_FORMS = "allow-forms";
 		
 		UIFrameView.ALLOW_SCRIPTS = "allow-scripts";
 	})
-	.Prototype('UIFrameView', function(proto, im){
+	.Prototype('UIFrameView', function(proto, im, UIFrameView){
 		
 		proto.UIFrameView = function(){
 			proto.superclass(this);
+			this.width('100%').height('100%');
+			this._cl_ready = false;
 			this._cl_iframe = document.createElement('iframe');
 			this._cl_iframe.frameBorder = 0;
 			this._cl_iframe.style.width = this._cl_iframe.style.height = '100%';
@@ -1690,6 +1810,10 @@ a5.Package('a5.cl.ui')
 			return this._cl_iframe;
 		}
 		
+		proto.iframeDocument = function(){ return this._cl_iframeDoc; }
+		
+		proto.ready = function(){ return this._cl_ready; }
+		
 		proto._cl_checkFrameDOM = function(){
 			if(this._cl_iframe.contentDocument)
 		    	this._cl_iframeDoc = this._cl_iframe.contentDocument;
@@ -1699,7 +1823,9 @@ a5.Package('a5.cl.ui')
 				this._cl_iframeDoc = this._cl_iframe.document;
 			if (this._cl_iframeDoc) {
 				this.cl().removeEventListener(im.CLEvent.GLOBAL_UPDATE_TIMER_TICK, this._cl_checkFrameDOM);
-				this.dispatchEvent('READY');
+				this._cl_ready = true;
+				this._cl_iframeDoc.write("");
+				this.dispatchEvent(UIFrameView.READY);
 			}		
 				
 		}
@@ -1719,7 +1845,9 @@ a5.Package('a5.cl.ui')
 				value = elem.innerHTML;
 				elem = null;
 			}
+			this._cl_iframeDoc.open('text/html', 'replace');
 			this._cl_iframeDoc.write(value);
+			this._cl_iframeDoc.close();
 		}
 		
 		proto.sandboxSettings = function(){
@@ -1770,7 +1898,7 @@ a5.Package('a5.cl.ui')
  */
 a5.Package('a5.cl.ui')
 	.Import('a5.cl.ui.events.*',
-			'a5.cl.core.Utils')
+			'a5.cl.initializers.dom.Utils')
 	.Extends('UIControl')
 	.Prototype('UIResizable', function(proto, im){
 		
@@ -1860,7 +1988,7 @@ a5.Package('a5.cl.ui')
 						var allCoords = ['n', 's', 'e', 'w', 'ne', 'se', 'sw', 'nw'];
 						for (var x = 0, y = allCoords.length; x < y; x++) {
 							var thisCoord = allCoords[x];
-							if (im.Utils.arrayIndexOf(coords, thisCoord) === -1) 
+							if (a5.cl.core.Utils.arrayIndexOf(coords, thisCoord) === -1) 
 								this.disableCoordinate(thisCoord);
 							else this.enableCoordinate(thisCoord);
 						}
@@ -2696,7 +2824,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarView = new im.CLViewContainer();
 			this._cl_tabBarBG = new im.CLViewContainer();
 			this._cl_tabBarWrapper = new im.CLViewContainer();
-			this._cl_contentView = new a5.cl.ui.UIFlexSpace();
+			this._cl_contentView = new im.CLViewContainer();
 			
 			this._cl_tabBarWrapper.height(25);
 			this._cl_tabBarView.relX(true);
@@ -2711,6 +2839,7 @@ a5.Package('a5.cl.ui.controllers')
 			this._cl_tabBarWrapper.addSubView(this._cl_tabBarView);
 			this.view().addSubView(this._cl_tabBarWrapper);
 			this.view().addSubView(this._cl_contentView);
+			this.view().constrainChildren(true);
 			this._cl_viewReady();
 			/*
 			var self = this;
@@ -2840,6 +2969,12 @@ a5.Package('a5.cl.ui.controllers')
 			dyingTab.tabView.removeEventListener(im.UIMouseEvent.CLICK, this._cl_eTabClickHandler);
 			this._cl_contentView.removeSubView(dyingTab.contentView, destroy !== false);
 			this._cl_tabBarView.removeSubView(dyingTab.tabView, destroy !== false);
+			for(var x = 0, y = this._cl_tabs.length; x < y; x++){
+				var thisTab = this._cl_tabs[x].tabView;
+				thisTab.width(thisTab.staticWidth() ? thisTab.staticWidth() :(100 / this._cl_tabs.length) + '%');
+			}
+			if (index < this._cl_activeTab)
+			    this._cl_activeTab--;
 			return destroy === false ? dyingTab : null;
 		}
 		
@@ -2870,7 +3005,7 @@ a5.Package('a5.cl.ui.controllers')
 				var thisTab = this._cl_tabs[x];
 				var isActive = x === index;
 				thisTab.contentView.visible(isActive);
-				thisTab.contentView.suspendRedraws(!isActive);
+				//thisTab.contentView.suspendRedraws(!isActive);
 				if (isActive) {
 					thisTab.tabView.activated();
 					this._cl_activeTab = x;
@@ -3601,6 +3736,7 @@ a5.Package('a5.cl.ui.form')
 		
 		this.Properties(function(){
 			this._cl_element = null;
+			this._cl_referencedElem = null;
 			this._cl_multiline = false;
 			this._cl_defaultValue = '';
 			this._cl_textColor = '#000';
@@ -3608,6 +3744,7 @@ a5.Package('a5.cl.ui.form')
 			this._cl_password = false;
 			this._cl_imitateLabel = false;
 			this._cl_historyEnabled = false;
+			this._cl_readOnly = false;
 			this._cl_dataStore = null;
 			this._cl_history = null;
 			this._cl_userEnteredValue = "";
@@ -3617,8 +3754,12 @@ a5.Package('a5.cl.ui.form')
 			this._cl_textAlign = 'left';
 		})
 		
-		proto.UIInputField = function(text){
+		proto.UIInputField = function(text, referencedElem){
 			proto.superclass(this);
+			if(referencedElem){
+				var newElem = typeof referencedElem == 'string' ? document.getElementById(referencedElem) : referencedElem;	
+				this._cl_referencedElem = newElem;
+			}
 			this.multiline(false, true); //creates the input element			
 			this.inputView().border(1, 'solid', '#C8C6C4').backgroundColor('#fff');
 			this.height('auto').relX(true);
@@ -3733,16 +3874,17 @@ a5.Package('a5.cl.ui.form')
 				var previousValue = this._cl_element ? this._cl_element.value : '';
 				this.inputView().clearHTML();
 				if(value){
-					this._cl_element = document.createElement('textarea');
+					this._cl_element = this._cl_referencedElem || document.createElement('textarea');
 					this._cl_element.style.resize = 'none';
 					this.inputView().height('100%');
 				} else {
 					this.inputView().clearHTML();
-					this._cl_element = document.createElement('input');
+					this._cl_element = this._cl_referencedElem || document.createElement('input');
 					this._cl_element.type = this._cl_password ? 'password' : 'text';
 					this.inputView().height(22);
 				}
-				this._cl_element.id = this.instanceUID() + '_field';
+				if(!this._cl_referencedElem)
+					this._cl_element.id = this.instanceUID() + '_field';
 				this._cl_element.style.width = this._cl_element.style.height = '100%';
 				this._cl_element.style.padding = this._cl_element.style.margin = '0px';
 				this._cl_element.style.border = 'none';
@@ -3752,7 +3894,8 @@ a5.Package('a5.cl.ui.form')
 				this._cl_addFocusEvents(this._cl_element);
 				this.keyboardEventTarget(this._cl_element);
 				this.inputView().appendChild(this._cl_element);
-				this._cl_element.value = previousValue;
+				if(!this._cl_referencedElem)
+					this._cl_element.value = previousValue;
 				return this;
 			}
 			return this._cl_multiline;
@@ -3765,6 +3908,15 @@ a5.Package('a5.cl.ui.form')
 				return this;
 			}
 			return this._cl_enabled;
+		}
+		
+		proto.readOnly = function(value){
+			if(typeof value === 'boolean'){
+				this._cl_readOnly = value;
+				this._cl_element.readOnly = value;
+				return this;
+			}
+			return this._cl_readOnly;
 		}
 		
 		proto.historyEnabled = function(value){
@@ -4014,15 +4166,20 @@ a5.Package('a5.cl.ui.form')
 	.Extends('UIFormElement')
 	.Mix('a5.cl.ui.mixins.UIGroupable')
 	.Prototype('UIOptionButton', function(proto, im){
-		proto.UIOptionButton = function(type){
+		proto.UIOptionButton = function(type, label, group){
 			proto.superclass(this);
 			this._cl_value = null;
 			this._cl_defaultValue = null;
 			this._cl_input = this._cl_createInput((type === 'radio') ? 'radio' : 'checkbox');
-			this.height('auto')
+			if(label)
+				this.label(label);
+			if(group)
+				this.optionGroup(group);
+			this.height('auto').width('auto')
 				.inputViewWidth(25)
 				.labelViewWidth('auto')
 				.relX(true);
+			this._cl_labelView.y(4);
 		}
 		
 		proto.Override.viewReady = function(){
@@ -4195,7 +4352,7 @@ a5.Package('a5.cl.ui.form')
 					opt = document.createElement('option');
 					opt.innerHTML = item.label;
 					opt.value = item.value + '';
-					opt.title = item.title + '';
+					opt.title = (item.title || item.label) + '';
 				}
 				//add the item to the select
 				sel.appendChild(opt);
@@ -4252,7 +4409,7 @@ a5.Package('a5.cl.ui.form')
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value, null, opt.title);
+						this.addOption(opt.label, opt.value, null, opt.title, true);
 				}
 			}
 		}
@@ -4265,11 +4422,12 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [group]	The label of the group that this option should be added to.
 		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group, title){
+		proto.addOption = function(label, value, group, title, skipRedraw){
 			//call the internal method
 			this._cl_addOptionAtIndex(label, value, -1, group, title);
 			//redraw the select
-			this._cl_redrawSelect();
+			if(!skipRedraw)
+				this._cl_redrawSelect();
 		}
 		
 		/**
@@ -4955,7 +5113,7 @@ a5.Package('a5.cl.ui.form')
 		
 		cls._cl_updateSelectedDisplay = function(){
 			if(this._cl_dateValue)
-				this._cl_element.value(this._cl_dateValue.toLocaleFormat());
+				this._cl_element.value(this._cl_dateValue.toLocaleString());
 			else
 				this._cl_element.value("");
 		}
@@ -4978,7 +5136,7 @@ a5.Package('a5.cl.ui.form')
 
 a5.Package('a5.cl.ui.form')
 	.Import('a5.cl.core.Utils',
-			'a5.cl.CLEvent')
+			'a5.cl.CLMVCEvent')
 	.Extends('a5.cl.CLViewContainer')
 	.Prototype('UIForm', function(proto, im, UIForm){
 	
@@ -4993,8 +5151,8 @@ a5.Package('a5.cl.ui.form')
 			this._cl_viewElementType = 'form';
 			proto.superclass(this);
 			
-			this.addEventListener(im.CLEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
-			this.addEventListener(im.CLEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
 		}
 		
 		proto.validate = function(){
@@ -5010,6 +5168,30 @@ a5.Package('a5.cl.ui.form')
 				}
 			}
 			return invalid.length === 0 ? true : invalid;
+		}
+		
+		proto.formTarget = function(url){
+			var iframe = document.createElement('iframe'),
+				targetID = this.instanceUID() + '_ifrTarget';
+			iframe.src = url;
+			iframe.style.display = 'none';
+			iframe.name = targetID;
+			this._cl_parentView._cl_viewElement.insertBefore(iframe, this._cl_viewElement);
+			this._cl_viewElement.action = url;
+			this._cl_viewElement.method = "post";
+			this._cl_viewElement.name = this.instanceUID() + "_formName";
+			this._cl_viewElement.target = targetID; 
+			var submitBtn = document.createElement('input');
+			submitBtn.type = 'submit';
+			submitBtn.style.display = 'none';
+			submitBtn.id = this.instanceUID() + "_formSubmit";
+			this._cl_viewElement.appendChild(submitBtn);
+			
+		}
+		
+		proto.submitFormTarget = function(){
+			document.getElementById(this.instanceUID() + "_formSubmit").click();
+			//this._cl_viewElement.submit();
 		}
 		
 		proto.getData = function(){
@@ -5098,8 +5280,22 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto._cl_eChildViewHandler = function(e){
-			var view = e.target(), 
-				index = -1;
+			var view = e.target(),
+				self = this, 
+				index = -1,
+				checkChildren = function(viewContainer){
+					for(var i = 0, l = viewContainer.subViewCount(); i<l; i++){
+						var view = viewContainer.subViewAtIndex(i);		
+						if (view instanceof im.UIFormElement && view.includeInParentForm()) {
+							view._cl_form = self;
+							view.addOneTimeEventListener(a5.Event.DESTROYED, self._cl_eChildViewHandler, false, self);
+							self._cl_elements.push(view);
+						} else if (view instanceof a5.cl.CLViewContainer) {
+							checkChildren(view);
+						}
+					}
+				}
+			
 			if(view instanceof UIForm && view !== this){
 				this.throwError("UIForms cannot be nested within other UIForms.  Consider a different view structure.");
 				return;
@@ -5107,13 +5303,13 @@ a5.Package('a5.cl.ui.form')
 			if(view instanceof im.UIFormElement) {
 				if (view.includeInParentForm()) {
 					switch (e.type()) {
-						case im.CLEvent.ADDED_TO_PARENT:
+						case im.CLMVCEvent.ADDED_TO_PARENT:
 							view._cl_form = this;
 							view.addOneTimeEventListener(a5.Event.DESTROYED, this._cl_eChildViewHandler, false, this);
 							this._cl_elements.push(view);
 							break;
 						case a5.Event.DESTROYED:
-						case im.CLEvent.REMOVED_FROM_PARENT:
+						case im.CLMVCEvent.REMOVED_FROM_PARENT:
 							index = im.Utils.arrayIndexOf(this._cl_elements, view);
 							if (index > -1) {
 								this._cl_elements.splice(index, 1);
@@ -5122,11 +5318,9 @@ a5.Package('a5.cl.ui.form')
 							break;
 					}
 				}
-			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
+			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLMVCEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
-				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(new im.CLEvent(im.CLEvent.ADDED_TO_PARENT));
-				}
+				checkChildren(view);
 			}
 		}
 });
@@ -5149,7 +5343,7 @@ a5.Package('a5.cl.ui.buttons')
 		UIButton.themeDefaults = {
 			//width:100,
 			//height:25,
-			padding:{left:5, right:5},
+			padding:5,
 			backgroundColor:['#FFF', '#CCC'],
 			border:[1, 'solid', '#AAA', 5],
 			_states_:{
@@ -5375,7 +5569,12 @@ a5.Package('a5.cl.ui.buttons')
 
 a5.Package('a5.cl.ui.modals')
 	.Extends('a5.cl.CLWindow')
-	.Prototype('UIModal', function(proto, im){
+	.Static(function(UIModal){
+		
+		UIModal.CLOSE = 'uiModalClose';
+		
+	})
+	.Prototype('UIModal', function(proto, im, UIModal){
 		
 		this.Properties(function(){
 			this._cl_destroyOnClose = true;
@@ -5395,8 +5594,10 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.close = function(){
-			if(this.isOpen())
+			if (this.isOpen()) {
+				this.dispatchEvent(UIModal.CLOSE);
 				this.MVC().application().removeWindow(this, this._cl_destroyOnClose);
+			}
 		}
 		
 		proto.Override.hide = function(){
@@ -5827,7 +6028,7 @@ a5.Package('a5.cl.ui.modals')
 					.relY(true)
 					.padding(10)
 					.height('auto')
-					.width('100%').maxWidth(300);
+					.width('auto').minWidth(300);
 			var btnClass = buttonClass || im.UIButton;		
 			this._cl_messageField = new im.UITextField().width('100%').height('auto').textAlign('center');
 			this._cl_continueButton = new btnClass().label("OK");
@@ -5873,6 +6074,14 @@ a5.Package('a5.cl.ui.modals')
 				if(this._cl_buttonHolder.containsSubView(this._cl_cancelButton))
 					this._cl_buttonHolder.removeSubView(this._cl_cancelButton);
 			}
+		}
+		
+		proto.addButton = function(btn){
+			this._cl_buttonHolder.addSubView(new im.UIFlexSpace());
+			this._cl_buttonHolder.addSubView(btn);
+			btn.addEventListener(im.UIMouseEvent.CLICK, function(){
+				this.close();
+			}, false, this);
 		}
 		
 		proto.contentWrapper = function(){
@@ -6124,7 +6333,7 @@ a5.Package('a5.cl.ui.list')
 		proto.dealloc = function(){
 			if(this._cl_subList)
 				this._cl_subList._cl_isSubList = false;
-			this._cl_destroyElement(this._cl_arrow);
+			this._cl_destroyElement(this._cl_arrow._cl_viewElement);
 			this._cl_subList = this._cl_arrow = null;
 		}	
 });

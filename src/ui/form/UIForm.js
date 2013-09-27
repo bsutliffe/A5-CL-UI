@@ -1,7 +1,7 @@
 
 a5.Package('a5.cl.ui.form')
 	.Import('a5.cl.core.Utils',
-			'a5.cl.CLEvent')
+			'a5.cl.CLMVCEvent')
 	.Extends('a5.cl.CLViewContainer')
 	.Prototype('UIForm', function(proto, im, UIForm){
 	
@@ -16,8 +16,8 @@ a5.Package('a5.cl.ui.form')
 			this._cl_viewElementType = 'form';
 			proto.superclass(this);
 			
-			this.addEventListener(im.CLEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
-			this.addEventListener(im.CLEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.ADDED_TO_PARENT, this._cl_eChildViewHandler, false, this);
+			this.addEventListener(im.CLMVCEvent.REMOVED_FROM_PARENT, this._cl_eChildViewHandler, false, this);
 		}
 		
 		proto.validate = function(){
@@ -33,6 +33,30 @@ a5.Package('a5.cl.ui.form')
 				}
 			}
 			return invalid.length === 0 ? true : invalid;
+		}
+		
+		proto.formTarget = function(url){
+			var iframe = document.createElement('iframe'),
+				targetID = this.instanceUID() + '_ifrTarget';
+			iframe.src = url;
+			iframe.style.display = 'none';
+			iframe.name = targetID;
+			this._cl_parentView._cl_viewElement.insertBefore(iframe, this._cl_viewElement);
+			this._cl_viewElement.action = url;
+			this._cl_viewElement.method = "post";
+			this._cl_viewElement.name = this.instanceUID() + "_formName";
+			this._cl_viewElement.target = targetID; 
+			var submitBtn = document.createElement('input');
+			submitBtn.type = 'submit';
+			submitBtn.style.display = 'none';
+			submitBtn.id = this.instanceUID() + "_formSubmit";
+			this._cl_viewElement.appendChild(submitBtn);
+			
+		}
+		
+		proto.submitFormTarget = function(){
+			document.getElementById(this.instanceUID() + "_formSubmit").click();
+			//this._cl_viewElement.submit();
 		}
 		
 		proto.getData = function(){
@@ -121,8 +145,22 @@ a5.Package('a5.cl.ui.form')
 		}
 		
 		proto._cl_eChildViewHandler = function(e){
-			var view = e.target(), 
-				index = -1;
+			var view = e.target(),
+				self = this, 
+				index = -1,
+				checkChildren = function(viewContainer){
+					for(var i = 0, l = viewContainer.subViewCount(); i<l; i++){
+						var view = viewContainer.subViewAtIndex(i);		
+						if (view instanceof im.UIFormElement && view.includeInParentForm()) {
+							view._cl_form = self;
+							view.addOneTimeEventListener(a5.Event.DESTROYED, self._cl_eChildViewHandler, false, self);
+							self._cl_elements.push(view);
+						} else if (view instanceof a5.cl.CLViewContainer) {
+							checkChildren(view);
+						}
+					}
+				}
+			
 			if(view instanceof UIForm && view !== this){
 				this.throwError("UIForms cannot be nested within other UIForms.  Consider a different view structure.");
 				return;
@@ -130,13 +168,13 @@ a5.Package('a5.cl.ui.form')
 			if(view instanceof im.UIFormElement) {
 				if (view.includeInParentForm()) {
 					switch (e.type()) {
-						case im.CLEvent.ADDED_TO_PARENT:
+						case im.CLMVCEvent.ADDED_TO_PARENT:
 							view._cl_form = this;
 							view.addOneTimeEventListener(a5.Event.DESTROYED, this._cl_eChildViewHandler, false, this);
 							this._cl_elements.push(view);
 							break;
 						case a5.Event.DESTROYED:
-						case im.CLEvent.REMOVED_FROM_PARENT:
+						case im.CLMVCEvent.REMOVED_FROM_PARENT:
 							index = im.Utils.arrayIndexOf(this._cl_elements, view);
 							if (index > -1) {
 								this._cl_elements.splice(index, 1);
@@ -145,11 +183,9 @@ a5.Package('a5.cl.ui.form')
 							break;
 					}
 				}
-			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLEvent.ADDED_TO_PARENT){
+			} else if(view instanceof a5.cl.CLViewContainer && e.type() === im.CLMVCEvent.ADDED_TO_PARENT){
 				//if the child added is a container, check its children
-				for(var x = 0, y = view.subViewCount(); x < y; x++){
-					view.subViewAtIndex(x).dispatchEvent(new im.CLEvent(im.CLEvent.ADDED_TO_PARENT));
-				}
+				checkChildren(view);
 			}
 		}
 });

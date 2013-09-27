@@ -10,16 +10,20 @@ a5.Package('a5.cl.ui')
 	.Extends('UIHTMLControl')
 	.Static(function(UIFrameView){
 		
+		UIFrameView.READY = 'uiFrameViewReady';
+		
 		UIFrameView.ALLOW_SAME_ORIGIN = "allow-same-origin";
 		
 		UIFrameView.ALLOW_FORMS = "allow-forms";
 		
 		UIFrameView.ALLOW_SCRIPTS = "allow-scripts";
 	})
-	.Prototype('UIFrameView', function(proto, im){
+	.Prototype('UIFrameView', function(proto, im, UIFrameView){
 		
 		proto.UIFrameView = function(){
 			proto.superclass(this);
+			this.width('100%').height('100%');
+			this._cl_ready = false;
 			this._cl_iframe = document.createElement('iframe');
 			this._cl_iframe.frameBorder = 0;
 			this._cl_iframe.style.width = this._cl_iframe.style.height = '100%';
@@ -34,6 +38,10 @@ a5.Package('a5.cl.ui')
 			return this._cl_iframe;
 		}
 		
+		proto.iframeDocument = function(){ return this._cl_iframeDoc; }
+		
+		proto.ready = function(){ return this._cl_ready; }
+		
 		proto._cl_checkFrameDOM = function(){
 			if(this._cl_iframe.contentDocument)
 		    	this._cl_iframeDoc = this._cl_iframe.contentDocument;
@@ -43,7 +51,9 @@ a5.Package('a5.cl.ui')
 				this._cl_iframeDoc = this._cl_iframe.document;
 			if (this._cl_iframeDoc) {
 				this.cl().removeEventListener(im.CLEvent.GLOBAL_UPDATE_TIMER_TICK, this._cl_checkFrameDOM);
-				this.dispatchEvent('READY');
+				this._cl_ready = true;
+				this._cl_iframeDoc.write("");
+				this.dispatchEvent(UIFrameView.READY);
 			}		
 				
 		}
@@ -63,7 +73,9 @@ a5.Package('a5.cl.ui')
 				value = elem.innerHTML;
 				elem = null;
 			}
+			this._cl_iframeDoc.open('text/html', 'replace');
 			this._cl_iframeDoc.write(value);
+			this._cl_iframeDoc.close();
 		}
 		
 		proto.sandboxSettings = function(){

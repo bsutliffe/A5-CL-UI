@@ -169,7 +169,7 @@ a5.Package('a5.cl.ui.list')
 		proto.dealloc = function(){
 			if(this._cl_subList)
 				this._cl_subList._cl_isSubList = false;
-			this._cl_destroyElement(this._cl_arrow);
+			this._cl_destroyElement(this._cl_arrow._cl_viewElement);
 			this._cl_subList = this._cl_arrow = null;
 		}	
 });
