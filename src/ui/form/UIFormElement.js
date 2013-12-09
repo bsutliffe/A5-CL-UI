@@ -310,7 +310,10 @@ a5.Package('a5.cl.ui.form')
 		
 		
 		proto.focus = function(){
-			this.element().focus();
+			var self = this;
+			this.async(function(){
+				self.element().focus();
+			}, null, 250);
 		}
 		
 		proto.blur = function(){
