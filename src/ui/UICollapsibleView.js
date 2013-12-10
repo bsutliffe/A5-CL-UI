@@ -34,7 +34,7 @@ a5.Package('a5.cl.ui')
 			this._ui_header.addEventListener(im.UIMouseEvent.CLICK, this._ui_eClickHandler, false, this);
 			
 			if(startCollapsed === true)
-				collapse();
+				this.collapse();
 		}
 		
 		proto.Override.childrenReady = function(){
