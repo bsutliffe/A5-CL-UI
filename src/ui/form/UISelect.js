@@ -428,10 +428,10 @@ a5.Package('a5.cl.ui.form')
 			if (value === undefined) {
 				var selectedOpt = this.selectedOption();
 				if (!a5.cl.core.Utils.isArray(selectedOpt)) 
-					return selectedOpt ? (selectedOpt.value || selectedOpt.label) : null;
+					return selectedOpt ? ((selectedOpt.value === undefined || selectedOpt.value === null) ? selectedOpt.label : selectedOpt.value) : null;
 				var data = [], x, y;
 				for (x = 0, y = selectedOpt.length; x < y; x++) {
-					data.push(selectedOpt[x].value || selectedOpt[x].label);
+					data.push((selectedOpt[x].value === undefined || selectedOpt[x].value === null) ? selectedOpt[x].label : selectedOpt[x].value);
 				}
 				return data;
 			} else {
