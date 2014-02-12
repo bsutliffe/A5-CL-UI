@@ -308,6 +308,14 @@ a5.Package('a5.cl.ui.form')
 			return this._cl_labelView.underline(value);
 		}
 		
+		proto.labelViewAlignX = function(value){
+			return this._cl_labelView.alignX(value);
+		}
+		
+		proto.labelViewAlignY = function(value){
+			return this._cl_labelView.alignY(value);
+		}
+		
 		
 		proto.focus = function(){
 			var self = this;
