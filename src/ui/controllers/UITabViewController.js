@@ -342,7 +342,7 @@ a5.Package('a5.cl.ui.controllers')
 				var children = a5.cl.mvc.core.XMLUtils.children(node.node);
 				if(children.length > 0) {
 					var builder = new a5.cl.core.viewDef.ViewBuilder(this, children[0], defaults, imports, rootView),
-						targetIndex = this.tabCount();
+						targetIndex = this.tabCount() + this._cl_pendingTabs;
 					this._cl_pendingTabs++;
 					builder.build(function(view){
 						this.addTabAtIndex(view, targetIndex, node.label);
