@@ -74,6 +74,7 @@ a5.Package('a5.cl.ui.form')
 					opt.innerHTML = item.label;
 					opt.value = item.value + '';
 					opt.title = (item.title || item.label) + '';
+					opt.disabled = item.disabled;
 				}
 				//add the item to the select
 				sel.appendChild(opt);
@@ -130,7 +131,7 @@ a5.Package('a5.cl.ui.form')
 					if(opt.isGroup !== undefined && opt.isGroup === true)
 						this._cl_addGroup(opt.label, -1, opt.options);
 					else
-						this.addOption(opt.label, opt.value, null, opt.title, true);
+						this.addOption(opt.label, opt.value, null, opt.title, true, opt.disabled);
 				}
 			}
 		}
@@ -143,9 +144,9 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [group]	The label of the group that this option should be added to.
 		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOption = function(label, value, group, title, skipRedraw){
+		proto.addOption = function(label, value, group, title, skipRedraw, disabled){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, -1, group, title);
+			this._cl_addOptionAtIndex(label, value, -1, group, title, disabled);
 			//redraw the select
 			if(!skipRedraw)
 				this._cl_redrawSelect();
@@ -160,15 +161,15 @@ a5.Package('a5.cl.ui.form')
 		 * @param {String} [group]	The label of the group that this option should be added to.
 		 * @param {String} [title]	The tooltip to dislay when hovering over this option.
 		 */
-		proto.addOptionAtIndex = function(label, value, index, group, title){
+		proto.addOptionAtIndex = function(label, value, index, group, title, disabled){
 			//call the internal method
-			this._cl_addOptionAtIndex(label, value, index, group, title);
+			this._cl_addOptionAtIndex(label, value, index, group, title, disabled);
 			//redraw the select
 			this._cl_redrawSelect();
 		}
 		
 		/** @private */
-		proto._cl_addOptionAtIndex = function(label, value, index, group, title){
+		proto._cl_addOptionAtIndex = function(label, value, index, group, title, disabled){
 			if(typeof group === 'string' && typeof index === 'number'){
 				//if a group was specified, add the option to that group
 				var grp = this._cl_findGroup(group);
@@ -185,7 +186,7 @@ a5.Package('a5.cl.ui.form')
 				//validate the index
 				if(index < 0 || index > this._cl_options.length) index = this._cl_options.length;
 				//add it to the array at the specified index
-				this._cl_options.splice(index, 0, {label:label, value:value, title:title});
+				this._cl_options.splice(index, 0, {label:label, value:value, title:title, disabled:!!disabled});
 			}
 		}
 		
