@@ -111,41 +111,37 @@ a5.Package('a5.cl.ui.controllers')
 		 * @param {String} [tabLabel] The label for this tab. Defaults to the 'tabLabel' property on the contentView, or the string "Tab #", where # is the current number of tabs.
 		 * @param {a5.cl.ui.interfaces.ITabView} [tabView] A view instance to use as the tab. (must implement ITabView). Defaults to a new instance of of this.tabViewClass().
 		 */
-		proto.addTabAtIndex = this.Attributes(
-		["a5.Contract", { contentView:'a5.cl.CLView', index:'number', tabLabel:'string=""', tabView:'a5.cl.ui.interfaces.ITabView=null'}], 
-		function(args){	
-			if(args){
-				//create or get the tab
-				var newTab = args.tabView || new this._cl_tabViewClass();
-				//keep a reference to the views
-				this._cl_tabs.splice(args.index, 0, {
-					tabView: newTab,
-					contentView: args.contentView
-				});
-				//set up the tab
-				newTab.label(args.tabLabel || (typeof args.contentView.tabLabel === 'string' ? args.contentView.tabLabel : ('Tab ' + this._cl_tabs.length)));
-				if (newTab.staticWidth()) {
-					newTab.width(newTab.staticWidth());
-				} else {
-					//divide the tabs evenly across the width of the tabBarView
-					for(var x = 0, y = this._cl_tabs.length; x < y; x++){
-						var thisTab = this._cl_tabs[x].tabView;
-						thisTab.width((100 / this._cl_tabs.length) + '%');
-					}
+		proto.addTabAtIndex = function(contentView, index, tabLabel, tabView){
+			//create or get the tab
+			var newTab = tabView || new this._cl_tabViewClass();
+			//keep a reference to the views
+			this._cl_tabs.splice(index, 0, {
+				tabView: newTab,
+				contentView: contentView
+			});
+			//set up the tab
+			newTab.label(tabLabel || (typeof contentView.tabLabel === 'string' ? contentView.tabLabel : ('Tab ' + this._cl_tabs.length)));
+			if (newTab.staticWidth()) {
+				newTab.width(newTab.staticWidth());
+			} else {
+				//divide the tabs evenly across the width of the tabBarView
+				for(var x = 0, y = this._cl_tabs.length; x < y; x++){
+					var thisTab = this._cl_tabs[x].tabView;
+					thisTab.width((100 / this._cl_tabs.length) + '%');
 				}
-				newTab.deactivated();
-				newTab.clickEnabled(true);
-				newTab.usePointer(true);
-				newTab.addEventListener(im.UIMouseEvent.CLICK, this._cl_eTabClickHandler, false, this);
-				this._cl_tabBarView.addSubViewAtIndex(newTab, args.index);
-				//add the content view
-				args.contentView.visible(false);
-				this._cl_contentView.addSubViewAtIndex(args.contentView, args.index);
-				//if no tab is active, activate this one
-				if(this._cl_activeTab === -1)
-					this.activateTabAtIndex(0);
 			}
-		})
+			newTab.deactivated();
+			newTab.clickEnabled(true);
+			newTab.usePointer(true);
+			newTab.addEventListener(im.UIMouseEvent.CLICK, this._cl_eTabClickHandler, false, this);
+			this._cl_tabBarView.addSubViewAtIndex(newTab, index);
+			//add the content view
+			contentView.visible(false);
+			this._cl_contentView.addSubViewAtIndex(contentView, index);
+			//if no tab is active, activate this one
+			if(this._cl_activeTab === -1)
+				this.activateTabAtIndex(0);
+		}
 		
 		/**
 		 * Removes the tab with the specified view as its content.
