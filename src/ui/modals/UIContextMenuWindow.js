@@ -1,7 +1,7 @@
 
 a5.Package('a5.cl.ui.modals')
 	.Import('a5.cl.ui.UIControl',
-			'a5.cl.core.Utils')
+			'a5.cl.initializers.dom.Utils')
 	.Extends('a5.cl.CLWindow')
 	.Prototype('UIContextMenuWindow', function(proto, im){
 		
@@ -47,7 +47,7 @@ a5.Package('a5.cl.ui.modals')
 		}
 		
 		proto.close = function(){
-			this.cl().application().removeWindow(this, false);
+			this.MVC().application().removeWindow(this, false);
 			im.Utils.removeEventListener(window, 'click', this._cl_globalClickHandler);
 		}
 		
